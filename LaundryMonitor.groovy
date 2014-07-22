@@ -60,7 +60,7 @@ def initialize() {
 }
 
 def powerInputHandler(evt) {
-	def latestPower = meter.currentValue("power")
+	def latestPower = sensor1.currentValue("power")
     log.trace "Power: ${latestPower}W"
     
     if (latestPower > minimumWattage) {
