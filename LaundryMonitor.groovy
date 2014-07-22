@@ -63,7 +63,7 @@ def powerInputHandler(evt) {
 	def latestPower = sensor1.currentValue("power")
     log.trace "Power: ${latestPower}W"
     
-    if (latestPower > minimumWattage) {
+    if (!state.isRunning && latestPower > minimumWattage) {
     	state.isRunning = true
 		state.startedAt = now()
         state.stoppedAt = null
