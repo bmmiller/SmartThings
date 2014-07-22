@@ -13,6 +13,9 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+import groovy.time.* 
+ 
 definition(
     name: "Laundry Monitor",
     namespace: "bmmiller",
@@ -57,7 +60,7 @@ def initialize() {
 }
 
 def powerInputHandler(evt) {
-	def latestPower = $evt.value
+	def latestPower = meter.currentValue("power")
     log.trace "Power: ${latestPower}W"
     
     if (latestPower > minimumWattage) {
