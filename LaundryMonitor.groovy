@@ -38,7 +38,7 @@ preferences {
 
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
-        input "message", "text", title: "Notification message", description: "Laudry is done!", required: true
+        input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
     }
 }
 
