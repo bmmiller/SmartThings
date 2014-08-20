@@ -69,9 +69,9 @@ def powerInputHandler(evt) {
         state.stoppedAt = null
         log.trace "Cycle started."
     } else if (state.isRunning && latestPower < minimumWattage) {
-    	log.debug "startedAt: ${state.startedAt}, stoppedAt: ${state.stoppedAt}"
-        state.stoppedAt = now()       
-        
+    	state.isRunning = false
+        state.stoppedAt = now()  
+        log.debug "startedAt: ${state.startedAt}, stoppedAt: ${state.stoppedAt}"                    
         log.info message
 
         if (phone) {
