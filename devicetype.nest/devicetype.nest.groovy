@@ -27,6 +27,7 @@ metadata {
         command "present"
         command "setPresence"
         command "range"
+        command "setHumiditySetpoint"
     }
 
     simulator {
@@ -96,15 +97,15 @@ def parse(String description) {
 }
 
 // handle commands
-def setHeatingSetpoint(temp) {
+def setHeatingSetpoint(temp) {	
     def latestThermostatMode = device.latestState('thermostatMode')
-    
+          
     if (temp) {
         if (latestThermostatMode.stringValue == 'range') {
             api('temperature', ['target_change_pending': true, 'target_temperature_low': fToC(temp)]) {
                 sendEvent(name: 'heatingSetpoint', value: temp)
             }
-        } else if (latestThermostatMode.stringValue == 'cool') {
+        } else if (latestThermostatMode.stringValue == 'heat') {
             api('temperature', ['target_change_pending': true, 'target_temperature': fToC(temp)]) {
                 sendEvent(name: 'heatingSetpoint', value: temp)
             }
@@ -124,6 +125,16 @@ def setCoolingSetpoint(temp) {
             api('temperature', ['target_change_pending': true, 'target_temperature': fToC(temp)]) {
                 sendEvent(name: 'coolingSetpoint', value: temp)
             }
+        }
+    }
+}
+
+def setHumiditySetpoint(humiditySP) {
+	def latestThermostatMode = device.latestState('thermostatMode')
+        
+    if (humiditySP) {
+    	api('humidity', ['target_humidity': humiditySP]) {
+        	sendEvent(name: 'humiditySetpoint', value: humiditySP)
         }
     }
 }
@@ -254,7 +265,8 @@ def api(method, args = [], success = {}) {
         'fan_mode': [uri: "/v2/put/device.${settings.serial}", type: 'post'],
         'thermostat_mode': [uri: "/v2/put/shared.${settings.serial}", type: 'post'],
         'temperature': [uri: "/v2/put/shared.${settings.serial}", type: 'post'],
-        'presence': [uri: "/v2/put/structure.${data.structureId}", type: 'post']
+        'presence': [uri: "/v2/put/structure.${data.structureId}", type: 'post'],
+        'humidity': [uri: "/v2/put/device.${settings.serial}", type: 'post'],
     ]
 
     def request = methods.getAt(method)
