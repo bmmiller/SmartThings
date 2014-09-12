@@ -28,6 +28,8 @@ metadata {
         command "setPresence"
         command "range"
         command "setHumiditySetpoint"
+        command "setTempUp"
+        command "setTempDown"
     }
 
     simulator {
@@ -58,18 +60,14 @@ metadata {
             state "on", label:'${name}', action:"thermostat.fanCirculate", icon: "st.Appliances.appliances11"
             state "circulate", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
         }
-        controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 3, inactiveLabel: false) {
-            state "setCoolingSetpoint", label:'Set temperarure to', action:"thermostat.setCoolingSetpoint",
-            backgroundColors:[
-                [value: 31, color: "#153591"],
-                [value: 44, color: "#1e9cbb"],
-                [value: 59, color: "#90d2a7"],
-                [value: 74, color: "#44b621"],
-                [value: 84, color: "#f1d801"],
-                [value: 95, color: "#d04e00"],
-                [value: 96, color: "#bc2323"]
-            ]
+        
+        standardTile("TempUp", "device.button") { 
+        	state "Temp Up", label:'${name}', action:"setTempUp", icon: "st.thermostat.thermostat-up"
         }
+        standardTile("TempDown", "device.button") { 
+        	state "Temp Down", label:'${name}', action:"setTempDown", icon: "st.thermostat.thermostat-down", backgroundColor: '#ffffff'
+        }
+        
         valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
             state "default", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
         }
@@ -87,7 +85,7 @@ metadata {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
         main "temperature"
-        details(["temperature", "thermostatMode", "thermostatFanMode", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "humidity", "presence", "refresh"])
+        details(["temperature", "thermostatMode", "thermostatFanMode", "heatingSetpoint", "coolingSetpoint", "humidity", "TempDown", "TempUp", "presence", "refresh"])
     }
 }
 
@@ -97,6 +95,42 @@ def parse(String description) {
 }
 
 // handle commands
+
+def setTempUp() { 
+	def latestThermostatMode = device.latestState('thermostatMode')
+    
+    if (latestThermostatMode.stringValue == 'cool') {
+		def newtemp = device.currentValue("coolingSetpoint").toInteger() + 1
+	
+    	sendEvent(name: 'coolingSetpoint', value: newtemp)
+		setTargetTemp(newtemp)
+        
+    } else if (latestThermostatMode.stringValue == 'heat') {
+    	def newtemp = device.currentValue("heatingSetpoint").toInteger() + 1
+	
+    	sendEvent(name: 'heatingSetpoint', value: newtemp)
+		setTargetTemp(newtemp)
+    }
+        
+}
+ 
+def setTempDown() { 
+	def latestThermostatMode = device.latestState('thermostatMode')
+    
+    if (latestThermostatMode.stringValue == 'cool') {
+		def newtemp = device.currentValue("coolingSetpoint").toInteger() - 1
+	
+    	sendEvent(name: 'coolingSetpoint', value: newtemp)
+		setTargetTemp(newtemp)
+        
+    } else if (latestThermostatMode.stringValue == 'heat') {
+    	def newtemp = device.currentValue("heatingSetpoint").toInteger() - 1
+	
+    	sendEvent(name: 'heatingSetpoint', value: newtemp)
+		setTargetTemp(newtemp)
+    }
+}
+
 def setHeatingSetpoint(temp) {	
     def latestThermostatMode = device.latestState('thermostatMode')
           
