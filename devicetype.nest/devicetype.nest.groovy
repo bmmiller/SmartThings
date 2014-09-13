@@ -103,13 +103,13 @@ def setTempUp() {
 		def newtemp = device.currentValue("coolingSetpoint").toInteger() + 1
 	
     	sendEvent(name: 'coolingSetpoint', value: newtemp)
-		setTargetTemp(newtemp)
+	setCoolingSetpoint(newtemp)
         
     } else if (latestThermostatMode.stringValue == 'heat') {
     	def newtemp = device.currentValue("heatingSetpoint").toInteger() + 1
 	
     	sendEvent(name: 'heatingSetpoint', value: newtemp)
-		setTargetTemp(newtemp)
+	setHeatingSetpoint(newtemp)
     }
         
 }
@@ -118,16 +118,16 @@ def setTempDown() {
 	def latestThermostatMode = device.latestState('thermostatMode')
     
     if (latestThermostatMode.stringValue == 'cool') {
-		def newtemp = device.currentValue("coolingSetpoint").toInteger() - 1
+	def newtemp = device.currentValue("coolingSetpoint").toInteger() - 1
 	
     	sendEvent(name: 'coolingSetpoint', value: newtemp)
-		setTargetTemp(newtemp)
+	setCoolingSetpoint(newtemp)
         
     } else if (latestThermostatMode.stringValue == 'heat') {
     	def newtemp = device.currentValue("heatingSetpoint").toInteger() - 1
 	
     	sendEvent(name: 'heatingSetpoint', value: newtemp)
-		setTargetTemp(newtemp)
+	setHeatingSetpoint(newtemp)
     }
 }
 
