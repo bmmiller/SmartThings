@@ -13,7 +13,9 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
 metadata {
+	// Automatically generated. Make future change here.
 	definition (name: "Aeon Labs Smart Energy Switch", namespace: "bmmiller", author: "Brandon Miller") {
 		capability "Energy Meter"
 		capability "Actuator"
@@ -22,12 +24,14 @@ metadata {
 		capability "Polling"
 		capability "Refresh"
 		capability "Sensor"
+        capability "Configuration"
 
 		command "reset"
 
 		fingerprint inClusters: "0x25,0x32"
 	}
 
+	// simulator metadata
 	simulator {
 		status "on":  "command: 2003, payload: FF"
 		status "off": "command: 2003, payload: 00"
@@ -44,10 +48,12 @@ metadata {
 		// reply messages
 		reply "2001FF,delay 100,2502": "command: 2503, payload: FF"
 		reply "200100,delay 100,2502": "command: 2503, payload: 00"
+
 	}
 
+	// tile definitions
 	tiles {
-    	standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
 			state "on", label: '${name}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821"
 			state "off", label: '${name}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff"
 		}
@@ -57,36 +63,29 @@ metadata {
 		valueTile("energy", "device.energy", decoration: "flat") {
 			state "default", label:'${currentValue} kWh'
 		}
-        standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat") {
-                        state "default", label:"", action:"refresh", icon:"st.secondary.refresh"
-        }
-        standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
-        				state "default", label:"reset kWh", action:"reset"
-        }
-        standardTile("configure", "device.power", inactiveLabel: false, decoration: "flat") {
-        				state "default", label:"", action:"configure", icon:"st.secondary.configure"
-        }
+		standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'reset kWh', action:"reset"
+		}
+		standardTile("configure", "device.power", inactiveLabel: false, decoration: "flat") {
+			state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
+		}
+		standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+		}
 
-        main(["switch", "power", "energy"])
-        details(["switch", "power", "energy", "refresh", "reset", "configure"])
+		main "switch"
+		details(["switch","power","energy","reset","configure","refresh"])
 	}
 }
 
-// parse events into attributes
 def parse(String description) {
-	log.debug "Parsing desc => '${description}'"
-
-    def result = null
-    //def cmd = zwave.parse(description, [0x60:3, 0x25:1, 0x32:1, 0x70:1])
-    def cmd = zwave.parse(description, [0x20: 1, 0x32: 1])
-    if (cmd) {
-        result = createEvent(zwaveEvent(cmd))
-    }
-    log.debug "Parsing result => '${result}'"
-    return result
+	def result = null
+	def cmd = zwave.parse(description, [0x25:1, 0x32:1])
+	if (cmd) {
+		result = createEvent(zwaveEvent(cmd))
+	}
+	return result
 }
-
-//Reports
 
 def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
 	if (cmd.scale == 0) {
