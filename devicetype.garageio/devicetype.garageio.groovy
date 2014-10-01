@@ -97,7 +97,7 @@ def poll() {
 }
 
 def openDoor() {
-	log.debug "Open Garage"   
+	log.debug "State Change: Open Garage"   
     
     def params = [
         uri: "https://garageio.com/api/controllers/ToggleController.php",
@@ -109,14 +109,14 @@ def openDoor() {
             door_state: "OPEN" 
         ]
     ]
-    log.debug "Before Opening: " + params
+
     httpPost(params) { response->
     	log.debug response.data
     }
 }
 
 def closeDoor() {
-	log.debug "Close Garage"
+	log.debug "State Change: Close Garage"
     
     def params = [
         uri: "https://garageio.com/api/controllers/ToggleController.php",
@@ -128,9 +128,7 @@ def closeDoor() {
             door_state: "CLOSED" 
         ]
     ]
-    
-    log.debug "Before Closing: " + params
-    
+   
     httpPost(params) { response->
     	log.debug response.data
     }
