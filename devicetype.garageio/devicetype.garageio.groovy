@@ -54,7 +54,7 @@ metadata {
         }
 		
         main(["status"])
-		details(["status","contact","refresh"])
+		details(["status","refresh"])
 	}
 }
 
