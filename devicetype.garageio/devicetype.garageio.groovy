@@ -28,8 +28,7 @@ metadata {
         
         attribute "status", "string"
         
-        command "openDoor"
-        command "closeDoor"
+        command "actuate"
 	}
 
 	simulator {
@@ -38,8 +37,8 @@ metadata {
     
     tiles {
 		standardTile("status", "device.status", width: 2, height: 2) {
-			state("closed", label:'${name}', icon:"st.doors.garage.garage-closed", action: "openDoor", backgroundColor:"#79b821", nextState:"opening")
-			state("open", label:'${name}', icon:"st.doors.garage.garage-open", action: "closeDoor", backgroundColor:"#ffa81e", nextState:"closing")
+			state("closed", label:'${name}', icon:"st.doors.garage.garage-closed", action: "actuate", backgroundColor:"#79b821", nextState:"opening")
+			state("open", label:'${name}', icon:"st.doors.garage.garage-open", action: "actuate", backgroundColor:"#ffa81e", nextState:"closing")
 			state("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
 			state("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
 		}
@@ -84,26 +83,30 @@ def poll() {
     	log.debug "We have a current token"
     }
     
-    if (state.data.data.devices.doors.state.toString() == "[[CLOSED]]")
+    if (state.data.data.devices[0].doors[0].state.toString() == "CLOSED")
     {
         sendEvent(name: 'status', value: 'closed')
         sendEvent(name: 'contact', value: 'closed')
     }
-    else if (state.data.data.devices.doors.state.toString() == "[[OPEN]]")
+    else if (state.data.data.devices[0].doors[0].state.toString() == "OPEN")
     {
     	sendEvent(name: 'status', value: 'open')
         sendEvent(name: 'contact', value: 'open')
     }
 }
 
-def openDoor() {
-	log.debug "State Change: Open Garage"   
+
+def actuate() {
+    def currentState = state.data.data.devices[0].doors[0].state
+    def changeState = (currentState == "OPEN") ? "CLOSE" : "OPEN"
+    log.debug "Current State: " + currentState
+    log.debug "State Change: " + changeState + " Garage"
     
+    // Make sure we have credentials
     if (data.auth == null)
     {
     	login()
     }
-        
     def params = [
         uri: "https://garageio.com/api/controllers/ToggleController.php",
         headers: [ "Content-Type": "application/x-www-form-urlencoded" ],
@@ -111,7 +114,7 @@ def openDoor() {
             auth_token: data.auth.data[0].authentication_token, 
             user_id: data.auth.userid, 
             door_id: settings.door_id, 
-            door_state: "OPEN" 
+            door_state: changeState 
         ]
     ]
 
@@ -119,31 +122,6 @@ def openDoor() {
         log.debug response.data
     } 
 }
-
-def closeDoor() {
-	log.debug "State Change: Close Garage"
-    
-    if (data.auth == null)
-    {
-    	login()
-    }
-    
-    def params = [
-        uri: "https://garageio.com/api/controllers/ToggleController.php",
-        headers: [ "Content-Type": "application/x-www-form-urlencoded" ],
-        body: [ 
-        	auth_token: data.auth.data[0].authentication_token, 
-            user_id: data.auth.userid, 
-            door_id: settings.door_id, 
-            door_state: "CLOSED" 
-        ]
-    ]
-   
-    httpPost(params) { response->
-    	log.debug response.data
-    }
-}
-
 
 def login() {
     def params = [
