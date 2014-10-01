@@ -99,11 +99,16 @@ def poll() {
 def openDoor() {
 	log.debug "State Change: Open Garage"   
     
+    if (data.auth == null)
+    {
+    	login()
+    }
+        
     def params = [
         uri: "https://garageio.com/api/controllers/ToggleController.php",
         headers: [ "Content-Type": "application/x-www-form-urlencoded" ],
         body: [ 
-        	auth_token: data.auth.data[0].authentication_token, 
+            auth_token: data.auth.data[0].authentication_token, 
             user_id: data.auth.userid, 
             door_id: settings.door_id, 
             door_state: "OPEN" 
@@ -111,12 +116,17 @@ def openDoor() {
     ]
 
     httpPost(params) { response->
-    	log.debug response.data
-    }
+        log.debug response.data
+    } 
 }
 
 def closeDoor() {
 	log.debug "State Change: Close Garage"
+    
+    if (data.auth == null)
+    {
+    	login()
+    }
     
     def params = [
         uri: "https://garageio.com/api/controllers/ToggleController.php",
