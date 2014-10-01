@@ -98,7 +98,7 @@ def poll() {
 
 def actuate() {
     def currentState = state.data.data.devices[0].doors[0].state
-    def changeState = (currentState == "OPEN") ? "CLOSE" : "OPEN"
+    def changeState = (currentState == "OPEN") ? "CLOSED" : "OPEN"
     log.debug "Current State: " + currentState
     log.debug "State Change: " + changeState + " Garage"
     
