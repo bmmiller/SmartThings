@@ -25,6 +25,7 @@ metadata {
 		capability "Contact Sensor"
         capability "Sensor"
 		capability "Polling"
+        capability "Switch"
         
         attribute "status", "string"
         
@@ -43,6 +44,13 @@ metadata {
 			state("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
 		}
         
+        standardTile("open", "device.door", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'open', action:"actuate", icon:"st.doors.garage.garage-opening"
+		}
+		standardTile("close", "device.door", inactiveLabel: false, decoration: "flat") {
+			state "default", label:'close', action:"actuate", icon:"st.doors.garage.garage-closing"
+		}
+        
         standardTile("contact", "device.contact") {
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
 			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
@@ -53,7 +61,7 @@ metadata {
         }
 		
         main(["status"])
-		details(["status","refresh"])
+		details(["status","open","close","refresh"])
 	}
 }
 
@@ -95,6 +103,9 @@ def poll() {
     }
 }
 
+def push() {
+	actuate()
+}
 
 def actuate() {
     def currentState = state.data.data.devices[0].doors[0].state
