@@ -17,7 +17,6 @@
 preferences {
     input("email_address", "text", title: "Username", description: "Your Garageio username (usually an email address)")
     input("password", "password", title: "Password", description: "Your Garageio password")
-    input("door_id", "text", title: "Door ID", description: "Your Garageio Door ID")
 }
  
 metadata {
@@ -112,6 +111,7 @@ def actuate() {
     def changeState = (currentState == "OPEN") ? "CLOSED" : "OPEN"
     log.debug "Current State: " + currentState
     log.debug "State Change: " + changeState + " Garage"
+    log.debug "Door ID: " + state.data.data.devices[0].doors[0].id
     
     // Make sure we have credentials
     if (data.auth == null)
@@ -124,7 +124,7 @@ def actuate() {
         body: [ 
             auth_token: data.auth.data[0].authentication_token, 
             user_id: data.auth.userid, 
-            door_id: settings.door_id, 
+            door_id: state.data.data.devices[0].doors[0].id, 
             door_state: changeState 
         ]
     ]
