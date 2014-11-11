@@ -28,7 +28,7 @@ metadata {
         
         attribute "status", "string"
         
-        command "actuate"
+        command "push"
 	}
 
 	simulator {
@@ -37,17 +37,17 @@ metadata {
     
     tiles {
 		standardTile("status", "device.status", width: 2, height: 2) {
-			state("closed", label:'${name}', icon:"st.doors.garage.garage-closed", action: "actuate", backgroundColor:"#79b821", nextState:"opening")
-			state("open", label:'${name}', icon:"st.doors.garage.garage-open", action: "actuate", backgroundColor:"#ffa81e", nextState:"closing")
+			state("closed", label:'${name}', icon:"st.doors.garage.garage-closed", action: "push", backgroundColor:"#79b821", nextState:"opening")
+			state("open", label:'${name}', icon:"st.doors.garage.garage-open", action: "push", backgroundColor:"#ffa81e", nextState:"closing")
 			state("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
 			state("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
 		}
         
         standardTile("open", "device.door", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'open', action:"actuate", icon:"st.doors.garage.garage-opening"
+			state "default", label:'open', action:"push", icon:"st.doors.garage.garage-opening"
 		}
 		standardTile("close", "device.door", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'close', action:"actuate", icon:"st.doors.garage.garage-closing"
+			state "default", label:'close', action:"push", icon:"st.doors.garage.garage-closing"
 		}
         
         standardTile("contact", "device.contact") {
@@ -103,10 +103,6 @@ def poll() {
 }
 
 def push() {
-	actuate()
-}
-
-def actuate() {
     def currentState = state.data.data.devices[0].doors[0].state
     def changeState = (currentState == "OPEN") ? "CLOSED" : "OPEN"
     log.debug "Current State: " + currentState
