@@ -22,6 +22,7 @@ metadata {
         capability "Temperature Measurement"
 
         attribute "presence", "string"
+        attribute "humiditySetpoint", "number"
 
         command "away"
         command "present"
@@ -74,8 +75,19 @@ metadata {
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
             state "default", label:'${currentValue}°', unit:"F", backgroundColor:"#ffffff"
         }
-        valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'${currentValue}%', unit:"Humidity"
+        valueTile("humidity", "device.humidity", canChangeIcon: true) {
+            state "default", label:'${currentValue}%', unit:"Humidity", backgroundColors: [
+                    [value: 20, color: "#E0FFFF"],
+                    [value: 25, color: "#00FFFF"],
+                    [value: 30, color: "#0EBFE9"],
+                    [value: 35, color: "#00B2EE"],
+                    [value: 40, color: "#007FFF"],
+                    [value: 45, color: "#1D7CF2"],
+                    [value: 50, color: "#003F87"]
+                ]
+        }
+        valueTile("humiditySetpoint", "humiditySetpoint", inactiveLabel: false, decoration: "flat") {
+            state "Setpoint", label:'${currentValue}%', unit:"Humidity"
         }
         standardTile("presence", "device.presence", inactiveLabel: false) {
             state "present", label:'${name}', action:"away", icon: "st.Home.home2"
@@ -85,7 +97,7 @@ metadata {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
         main "temperature"
-        details(["temperature", "thermostatMode", "thermostatFanMode", "heatingSetpoint", "coolingSetpoint", "humidity", "TempDown", "TempUp", "presence", "refresh"])
+        details(["temperature", "thermostatMode", "thermostatFanMode", "heatingSetpoint", "coolingSetpoint", "presence", "TempDown", "TempUp", "refresh", "humidity", "humiditySetpoint"])
     }
 }
 
@@ -103,13 +115,13 @@ def setTempUp() {
 		def newtemp = device.currentValue("coolingSetpoint").toInteger() + 1
 	
     	sendEvent(name: 'coolingSetpoint', value: newtemp)
-	setCoolingSetpoint(newtemp)
+		setCoolingSetpoint(newtemp)
         
     } else if (latestThermostatMode.stringValue == 'heat') {
     	def newtemp = device.currentValue("heatingSetpoint").toInteger() + 1
 	
     	sendEvent(name: 'heatingSetpoint', value: newtemp)
-	setHeatingSetpoint(newtemp)
+		setHeatingSetpoint(newtemp)
     }
         
 }
@@ -118,16 +130,16 @@ def setTempDown() {
 	def latestThermostatMode = device.latestState('thermostatMode')
     
     if (latestThermostatMode.stringValue == 'cool') {
-	def newtemp = device.currentValue("coolingSetpoint").toInteger() - 1
+		def newtemp = device.currentValue("coolingSetpoint").toInteger() - 1
 	
     	sendEvent(name: 'coolingSetpoint', value: newtemp)
-	setCoolingSetpoint(newtemp)
+		setCoolingSetpoint(newtemp)
         
     } else if (latestThermostatMode.stringValue == 'heat') {
     	def newtemp = device.currentValue("heatingSetpoint").toInteger() - 1
 	
     	sendEvent(name: 'heatingSetpoint', value: newtemp)
-	setHeatingSetpoint(newtemp)
+		setHeatingSetpoint(newtemp)
     }
 }
 
@@ -165,11 +177,12 @@ def setCoolingSetpoint(temp) {
 
 def setHumiditySetpoint(humiditySP) {
 	def latestThermostatMode = device.latestState('thermostatMode')
-        
+    
     if (humiditySP) {
     	api('humidity', ['target_humidity': humiditySP]) {
         	sendEvent(name: 'humiditySetpoint', value: humiditySP)
         }
+        humiditySetpoint = humiditySP
     }
 }
 
