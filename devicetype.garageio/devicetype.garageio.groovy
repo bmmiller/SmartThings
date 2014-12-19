@@ -29,6 +29,8 @@ metadata {
         attribute "status", "string"
         
         command "push"
+        command "open"
+        command "close"
 	}
 
 	simulator {
@@ -100,6 +102,14 @@ def poll() {
     	sendEvent(name: 'status', value: 'open')
         sendEvent(name: 'contact', value: 'open')
     }
+}
+
+def open() {
+	push()
+}
+
+def close() {
+	push()
 }
 
 def push() {
