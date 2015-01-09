@@ -25,49 +25,49 @@ definition(
 
 
 preferences {
-	section("Switches to turn off indicator lights on..."){
-		input "indicators0", "capability.indicator", multiple: true, required: false, title:"Indicator On when On"
+    section("Switches to turn off indicator lights on..."){
+        input "indicators0", "capability.indicator", multiple: true, required: false, title:"Indicator On when On"
         input "indicators1", "capability.indicator", multiple: true, required: false, title:"Indicator On when Off"
-	}
+    }
     
     section("Between these times...") {
-		input "time0", "time", title: "From what time?"
-		input "time1", "time", title: "Until what time?"
-	}
+        input "time0", "time", title: "From what time?"
+        input "time1", "time", title: "Until what time?"
+    }
 }
 
 def installed() {
-	log.debug "Installed with settings: ${settings}"
+    log.debug "Installed with settings: ${settings}"
 
-	schedule(time0, "turnOff")
+    schedule(time0, "turnOff")
     schedule(time1, "turnOn")
 }
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 
-	unsubscribe()
-	unschedule()
+    unsubscribe()
+    unschedule()
     schedule(time0, "turnOff")
     schedule(time1, "turnOn")
 }
 
 def turnOff() {
-	log.debug "Turning indicator lights off"
+    log.debug "Turning indicator lights off"
     
     if (indicators0)
-		indicators0.indicatorNever()
+        indicators0.indicatorNever()
     if (indicators1)
-    	indicators1.indicatorNever()
+        indicators1.indicatorNever()
 }
 
 def turnOn() {
-	log.debug "Return indicator lights to original state"
+    log.debug "Return indicator lights to original state"
     
-	if (indicators0)
-    	indicators0.indicatorWhenOn()
+    if (indicators0)
+        indicators0.indicatorWhenOn()
     if (indicators1)
-    	indicators1.indicatorWhenOff()
+        indicators1.indicatorWhenOff()
 }
 
 
