@@ -134,10 +134,28 @@ def push() {
             door_state: changeState 
         ]
     ]
-
-    httpPost(params) { response->
-        log.debug response.data
-    } 
+    
+    // The above auth check isn't perfect.  This is to account for a valid response that 
+    // states that the auth token has been rejected.  
+    def tryPost = true
+    def responseMessage
+    
+    while (tryPost) {
+        httpPost(params) { response->
+            log.debug response.data
+            responseMessage = response.data.message
+        }
+        
+        // Check here is fragile.  If they change their message, it will break. They have 
+        // a success flag, but I don't want to keep retrying the post if the failure isn't
+        // auth related.  They have a code, but I don't know what their codes necessarily mean.
+        if (responseMessage == "Authentication Token Expired. Authentication Required.") {
+            login()           
+            sleep(2) // Wait for 2 seconds to allow Garageio servers recognize the new auth token they just created
+        } else {
+            tryPost = false
+        }
+    }
 }
 
 def login() {
