@@ -3,7 +3,7 @@
  *
  *  Author: SmartThings
  *  Date: 2013-03-10
- *  Updated: 2014-11-10
+ *  Updated: 2015-03-19
  *
  * Monitors arrival and departure of car(s) and
  *
@@ -40,6 +40,10 @@ preferences {
     }
 	section("False alarm threshold (defaults to 10 min)") {
 		input "falseAlarmThreshold", "number", title: "Number of minutes", required: false
+	}
+    section("Allow Garage Opening Timeframe...") {
+		input name: "time0", title: "Start Time?", type: "time"
+        input name: "time1", title: "End Time?", type: "time"
 	}
 }
 
@@ -90,7 +94,7 @@ def carPresence(evt)
 	// time in which there must be no "not present" events in order to open the door
 	final openDoorAwayInterval = falseAlarmThreshold ? falseAlarmThreshold * 60 : 600
 
-	if (evt.value == "present") {
+	if (evt.value == "present" && now() > time0 && now < time1 ) {
 		// A car comes home
 
 		def car = getPresence(evt)
