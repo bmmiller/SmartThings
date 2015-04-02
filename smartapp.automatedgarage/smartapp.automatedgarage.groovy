@@ -72,7 +72,7 @@ def doorOpenCheck()
 		log.debug "doorOpenCheck"
 		if (currentState?.value == "open") {
 			log.debug "open for ${now() - currentState.date.time}, openDoorNotificationSent: ${state.openDoorNotificationSent}"
-			if (!state.openDoorNotificationSent && now() - currentState.date.time > thresholdMinutes * 60 *1000) {
+			if (!state.openDoorNotificationSent && now() - currentState.date.time > thresholdMinutes * 60 * 1000) {
 				def msg = "${doorSwitch.displayName} was been open for ${thresholdMinutes} minutes"
 				log.info msg
                 
@@ -82,19 +82,15 @@ def doorOpenCheck()
 				state.openDoorNotificationSent = true
 			}
 		}
-		else {
-			state.openDoorNotificationSent = false
-		}
 	}
 }
 
 def carPresence(evt)
 {
-	log.info "$evt.name: $evt.value"
 	// time in which there must be no "not present" events in order to open the door
 	final openDoorAwayInterval = falseAlarmThreshold ? falseAlarmThreshold * 60 : 600
 
-	if (evt.value == "present" && now() > time0 && now < time1 ) {
+	if ( evt.value == "present" && now() > timeToday(time0).time && now() < timeToday(time1).time ) {
 		// A car comes home
 
 		def car = getPresence(evt)
@@ -126,6 +122,8 @@ def garageDoorContact(evt)
 	}
 	else {
 		unschedule("doorOpenCheck")
+        state.openDoorNotificationSent = false
+        
 	}
 }
 
