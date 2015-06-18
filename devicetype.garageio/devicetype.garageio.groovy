@@ -86,6 +86,10 @@ def poll() {
     {
     	log.debug "Need to login"
     	login()
+        httpGet("https://garageio.com/api/controllers/SyncController.php?auth_token=" + data.auth.data[0].authentication_token + "&user_id=" + data.auth.userid) { response ->
+        	state.data = response.data       
+        	log.debug "Polling Result: " + state.data.success
+    	}
     }
     else if (state.data.success == true)
     {
@@ -158,7 +162,7 @@ def push() {
 
 def login() {
     def params = [
-        uri: 'https://garageio.com/api/controllers/AuthController.php',
+        uri: "https://garageio.com/api/controllers/AuthController.php",
         body: [email_address: settings.email_address, password: settings.password]
     ]
 
