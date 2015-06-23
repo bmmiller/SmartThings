@@ -66,10 +66,22 @@ metadata {
 	}
 }
 
+def installed() {
+	log.debug "Installed: Calling Initialize... "
+	initialize()
+}
 
+
+def updated() {	
+	log.debug "Updated: Calling Initialize... "  
+	initialize()
+}
 	
 def initialize() {
-	poll()
+	def pollTimer = 1
+
+	log.trace "Setting Poll to ${pollTimer}"
+	schedule("0 0/${pollTimer.toInteger()} * * * ?", poll)
 }
 
 
