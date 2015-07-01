@@ -1,7 +1,7 @@
 /**
- *  Garageio
+ *  Garageio Device
  *
- *  Copyright 2014 Brandon Miller
+ *  Copyright 2015 Brandon Miller
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -11,16 +11,18 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
+ * 
+ *  v1.1 - 20150701 - Preliminary conversion to ST preferred integtaion
  *
  */
  
 preferences {
-    input("email_address", "text", title: "Username", description: "Your Garageio username (usually an email address)")
+    input("email_address", "text", title: "Username", description: "Your Garageio username")
     input("password", "password", title: "Password", description: "Your Garageio password")
-}
+} 
  
 metadata {
-	definition (name: "Garageio", namespace: "bmmiller", author: "Brandon Miller") {
+	definition (name: "Garageio Device", namespace: "bmmiller", author: "Brandon Miller") {
 		capability "Contact Sensor"
         capability "Sensor"
 		capability "Polling"
@@ -31,10 +33,7 @@ metadata {
         command "push"
         command "open"
         command "close"
-	}
-
-	simulator {
-		// TODO: define status and reply messages here
+        command "login"
 	}
     
     tiles {
@@ -66,26 +65,6 @@ metadata {
 	}
 }
 
-def installed() {
-	log.debug "Installed: Calling Initialize... "
-	initialize()
-}
-
-
-def updated() {	
-	log.debug "Updated: Calling Initialize... "  
-	initialize()
-}
-	
-def initialize() {
-	def pollTimer = 1
-
-	log.trace "Setting Poll to ${pollTimer}"
-	schedule("0 0/${pollTimer.toInteger()} * * * ?", poll)
-}
-
-
-// handle commands
 def poll() {
 	log.debug "Executing 'poll'"   
     
@@ -165,7 +144,7 @@ def push() {
         if (responseCode == "401") {
         	log.debug "Retrying login..."
             login()           
-            sleep(2) // Wait for 2 seconds to allow Garageio servers recognize the new auth token they just created
+            sleep(2) // Wait for 2 seconds to allow Garageio servers to recognize the new auth token they just created
         } else {
             tryPost = false
         }
