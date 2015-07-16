@@ -21,7 +21,7 @@ definition(
     namespace: "bmmiller",
     author: "Brandon Miller",
     description: "This application is a modification of the SmartThings Laundry Monitor SmartApp.  Instead of using a vibration sensor, this utilizes Power (Wattage) draw from an Aeon Smart Energy Meter.",
-    category: "My Apps",
+    category: "Convenience",
     iconUrl: "http://www.vivevita.com/wp-content/uploads/2009/10/recreation_sign_laundry.png",
     iconX2Url: "http://www.vivevita.com/wp-content/uploads/2009/10/recreation_sign_laundry.png")
 
@@ -63,15 +63,15 @@ def powerInputHandler(evt) {
 	def latestPower = sensor1.currentValue("power")
     log.trace "Power: ${latestPower}W"
     
-    if (!state.isRunning && latestPower > minimumWattage) {
-    	state.isRunning = true
-		state.startedAt = now()
-        state.stoppedAt = null
+    if (!atomicState.isRunning && latestPower > minimumWattage) {
+    	atomicState.isRunning = true
+		atomicState.startedAt = now()
+        atomicState.stoppedAt = null
         log.trace "Cycle started."
-    } else if (state.isRunning && latestPower < minimumWattage) {
-    	state.isRunning = false
-        state.stoppedAt = now()  
-        log.debug "startedAt: ${state.startedAt}, stoppedAt: ${state.stoppedAt}"                    
+    } else if (atomicState.isRunning && latestPower < minimumWattage) {
+    	atomicState.isRunning = false
+        atomicState.stoppedAt = now()  
+        log.debug "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"                    
         log.info message
 
         if (phone) {
@@ -79,5 +79,8 @@ def powerInputHandler(evt) {
         } else {
             sendPush message
         }
-    }       
+    }
+    else {
+    	// Do Nothing, no change in either direction
+    }
 }
