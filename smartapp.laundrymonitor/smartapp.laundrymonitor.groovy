@@ -30,7 +30,6 @@ preferences {
 	section("Tell me when this washer/dryer has stopped..."){
 		input "sensor1", "capability.powerMeter"
 	}
-    
     section("Notifications") {
 		input "sendPushMessage", "bool", title: "Push Notifications?"
 		input "phone", "phone", title: "Send a text message?", required: false
@@ -39,7 +38,11 @@ preferences {
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
         input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
-    }
+	}
+	
+	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
+	    input "speech", "capability.capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
+	}
 }
 
 def installed() {
@@ -79,8 +82,14 @@ def powerInputHandler(evt) {
         } else {
             sendPush message
         }
+        
+        speechAlert(evt)
     }
     else {
     	// Do Nothing, no change in either direction
     }
+}
+
+private speechAlert(msg) {
+  speech.speak(msg)
 }
