@@ -30,6 +30,7 @@ preferences {
 	section("Tell me when this washer/dryer has stopped..."){
 		input "sensor1", "capability.powerMeter"
 	}
+    
     section("Notifications") {
 		input "sendPushMessage", "bool", title: "Push Notifications?"
 		input "phone", "phone", title: "Send a text message?", required: false
@@ -41,6 +42,7 @@ preferences {
 	}
 	
 	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
+	    input "phone", "phone", title: "Send a text message to:", required: false
 	    input "speech", "capability.capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
 	}
 }
@@ -92,4 +94,8 @@ def powerInputHandler(evt) {
 
 private speechAlert(msg) {
   speech.speak(msg)
+}
+
+private hideOptionsSection() {
+  (phone) ? false : true
 }
