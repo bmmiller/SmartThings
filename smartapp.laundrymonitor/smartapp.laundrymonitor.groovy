@@ -43,7 +43,7 @@ preferences {
 	
 	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
 	    input "phone", "phone", title: "Send a text message to:", required: false
-	    input "speech", "capability.capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
+	    input "speech", "capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
 	}
 }
 
