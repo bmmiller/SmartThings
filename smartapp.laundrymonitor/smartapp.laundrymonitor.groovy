@@ -85,7 +85,7 @@ def powerInputHandler(evt) {
             sendPush message
         }
         
-        speechAlert(evt)
+        speechAlert(message)
     }
     else {
     	// Do Nothing, no change in either direction
