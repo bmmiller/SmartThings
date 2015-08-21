@@ -39,7 +39,12 @@ preferences {
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
         input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
-    }
+	}
+	
+	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
+	    input "phone", "phone", title: "Send a text message to:", required: false
+	    input "speech", "capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
+	}
 }
 
 def installed() {
@@ -79,8 +84,20 @@ def powerInputHandler(evt) {
         } else {
             sendPush message
         }
+       
+        if (speech) { 
+     		speechAlert(message) 
+		}
     }
     else {
     	// Do Nothing, no change in either direction
     }
+}
+
+private speechAlert(msg) {
+  speech.speak(msg)
+}
+
+private hideOptionsSection() {
+  (phone) ? false : true
 }
