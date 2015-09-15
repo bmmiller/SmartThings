@@ -10,9 +10,7 @@ Step 3.
 Add smart app through https://ide.smarthings.com
 
 Step 4.
-Go to SmartThings app on phone, click the pick '+' and add your new SmartApp called "GarageioInit" under "My Apps"
+Go to SmartThings app on phone, click the pick '+' and add your new SmartApp called "GarageioServiceMgr" under "My Apps" and go through the setup.  You will be required to enter your user (email) and password here.
 
 Step 5.
-Choose the device you created in Step 2.
-
-Use device in any and all SmartApps you desire.
+You should be given the choice of doors on your account that you want to control.  Select the ones you want to control and complete setup.
