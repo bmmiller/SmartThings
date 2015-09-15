@@ -1,5 +1,11 @@
 /**
- *  Garageio Device
+ *  Garageio Device v1.1 - 2015-08-25
+ *
+ * 		Changelog
+ *			v1.1 - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
+ *				   polling, and ST suggested implementation.
+ *			v1.0 - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
+ *			v0.1 - Initial working integration
  *
  *  Copyright 2015 Brandon Miller
  *
@@ -11,30 +17,22 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
- * 
- *  v1.1 - 20150701 - Preliminary conversion to ST preferred integtaion
  *
  */
  
-preferences {
-    input("email_address", "text", title: "Username", description: "Your Garageio username")
-    input("password", "password", title: "Password", description: "Your Garageio password")
-} 
- 
 metadata {
 	definition (name: "Garageio Device", namespace: "bmmiller", author: "Brandon Miller") {
-		capability "Contact Sensor"
-        capability "Sensor"
-		capability "Polling"
-        capability "Switch"
+	capability "Contact Sensor"
+    capability "Sensor"
+	capability "Polling"
+    capability "Switch"
         
-        attribute "status", "string"
-        
-        command "push"
-        command "open"
-        command "close"
-        command "login"
-	}
+    attribute "status", "string"
+
+	command "push"
+	command "open"
+	command "close"
+}
     
     tiles {
 		standardTile("status", "device.status", width: 2, height: 2) {
@@ -66,99 +64,72 @@ metadata {
 }
 
 def poll() {
-	log.debug "Executing 'poll'"   
-    
-    httpGet("https://garageio.com/api/controllers/SyncController.php?auth_token=" + data.auth.data[0].authentication_token + "&user_id=" + data.auth.userid) { response ->
-        state.data = response.data       
-        log.debug "Polling Result: " + state.data.success
+	log.debug "Executing poll()"   
+    def results = parent.pollChildren()
+    parsePollData(results)
+}
+
+def parsePollData(results) {
+	log.debug "Results: " + results    
+    //log.debug "Door ID to Update: " + device.deviceNetworkId
+    if (results != null) {
+        results.each {
+            if (it.id == device.deviceNetworkId)
+            {
+                updateStatus(it.state)
+            }    
+        }   
     }
-    
-    if (state.data.success == false)
-    {
-    	log.debug "Need to login"
-    	login()
-        httpGet("https://garageio.com/api/controllers/SyncController.php?auth_token=" + data.auth.data[0].authentication_token + "&user_id=" + data.auth.userid) { response ->
-        	state.data = response.data       
-        	log.debug "Polling Result: " + state.data.success
-    	}
-    }
-    else if (state.data.success == true)
-    {
-    	log.debug "We have a current token"
-    }
-    
-    if (state.data.data.devices[0].doors[0].state.toString() == "CLOSED")
-    {
+    else {
+    	log.debug "Something went wrong, results of poll() were null."
+	}
+}
+
+def updateStatus(status) {
+	if (status == "CLOSED")
+    {    	
         sendEvent(name: 'status', value: 'closed')
         sendEvent(name: 'contact', value: 'closed')
     }
-    else if (state.data.data.devices[0].doors[0].state.toString() == "OPEN")
+    else if (status == "OPEN")
     {
     	sendEvent(name: 'status', value: 'open')
         sendEvent(name: 'contact', value: 'open')
     }
+    log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
+    // Now update
+    state.status = status
 }
 
 def open() {
-	push()
+	if (state.status == "CLOSED") {
+    	log.debug "open(): Opening door"
+		push()
+    } else {
+        log.debug "We're already open, doing nothing"
+    }
 }
 
 def close() {
-	push()
-}
-
-def push() {
-    def currentState = state.data.data.devices[0].doors[0].state
-    def changeState = (currentState == "OPEN") ? "CLOSED" : "OPEN"
-    log.debug "Current State: " + currentState
-    log.debug "State Change: " + changeState + " Garage"
-    log.debug "Door ID: " + state.data.data.devices[0].doors[0].id
-    
-    // Make sure we have credentials
-    if (data.auth == null)
-    {
-    	login()
-    }
-    def params = [
-        uri: "https://garageio.com/api/controllers/ToggleController.php",
-        headers: [ "Content-Type": "application/x-www-form-urlencoded" ],
-        body: [ 
-            auth_token: data.auth.data[0].authentication_token, 
-            user_id: data.auth.userid, 
-            door_id: state.data.data.devices[0].doors[0].id, 
-            door_state: changeState 
-        ]
-    ]
-    
-    // The above auth check isn't perfect.  This is to account for a valid response that 
-    // states that the auth token has been rejected.  
-    def tryPost = true
-    def responseCode
-    
-    while (tryPost) {
-        httpPost(params) { response->
-            log.debug response.data
-            responseCode = response.data.code
-        }
-        
-        if (responseCode == "401") {
-        	log.debug "Retrying login..."
-            login()           
-            sleep(2) // Wait for 2 seconds to allow Garageio servers to recognize the new auth token they just created
-        } else {
-            tryPost = false
-        }
+	if (state.status == "OPEN") {
+    	log.debug "close(): Closing door"
+		push()
+    } else {
+    	log.debug "We're already closed, doing nothing"
     }
 }
 
-def login() {
-    def params = [
-        uri: "https://garageio.com/api/controllers/AuthController.php",
-        body: [email_address: settings.email_address, password: settings.password]
-    ]
-
-    httpPost(params) {response ->
-        data.auth = response.data
-        log.debug data.auth
+def push() { 
+    def changeState = (state.status == "OPEN") ? "CLOSED" : "OPEN"
+    log.debug "Current State: ${state.status}, Change to State: ${changeState}, Door ID: ${device.deviceNetworkId}"
+    log.debug "Call parent.push(dni, changeState)"
+    
+    def result = parent.push(device.deviceNetworkId, changeState)
+    log.debug result
+    if (result == 200) {
+    	runIn(60, parent.pollChildren()) 
+    } else if (result == 401) {
+    	log.error "Authentication error, need to get/refresh token."
     }
 }
+
