@@ -84,7 +84,7 @@ def powerInputHandler(evt) {
         else if (atomicState.midCycleCheck == true)
         {
         	// Time between first check and now  
-            if (now() - atomicState.midCycleTime > minimumOffTime)
+            if ((now() - atomicState.midCycleTime)/1000 > minimumOffTime)
             {
             	atomicState.isRunning = false
                 atomicState.stoppedAt = now()  
