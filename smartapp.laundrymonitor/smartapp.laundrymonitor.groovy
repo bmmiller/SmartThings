@@ -101,18 +101,11 @@ def powerInputHandler(evt) {
           			switches*.on()
       			}               
                 if (speech) { 
-                    speechAlert(message) 
+                    speech.speak(message) 
                 }          
             }
         }             	
     }
-    else {
-    	// Do Nothing, no change in either direction
-    }
-}
-
-private speechAlert(msg) {
-  speech.speak(msg)
 }
 
 private hideOptionsSection() {
