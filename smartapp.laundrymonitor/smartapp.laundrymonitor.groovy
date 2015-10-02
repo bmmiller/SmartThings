@@ -33,7 +33,7 @@ preferences {
     
     section("Notifications") {
 		input "sendPushMessage", "bool", title: "Push Notifications?"
-		input "phone", "phone", title: "Send a text message?", required: false
+		input "phone", "phone", title: "Send a text message?", required: false      
 	}
 
 	section("System Variables"){
@@ -43,7 +43,7 @@ preferences {
 	}
 	
 	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
-	    input "phone", "phone", title: "Send a text message to:", required: false
+        input "switches", "capability.switch", title: "Turn on these switches?", required:false, multiple:true
 	    input "speech", "capability.speechSynthesis", title:"Speak message via: ", multiple: true, required: false
 	}
 }
@@ -96,10 +96,13 @@ def powerInputHandler(evt) {
                 } else {
                     sendPush message
                 }
-
+				
+                if (switches) {
+          			switches*.on()
+      			}               
                 if (speech) { 
                     speechAlert(message) 
-                }           
+                }          
             }
         }             	
     }
@@ -113,5 +116,5 @@ private speechAlert(msg) {
 }
 
 private hideOptionsSection() {
-  (phone) ? false : true
+  (phone || switches) ? false : true
 }
