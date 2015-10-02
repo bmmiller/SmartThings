@@ -38,6 +38,7 @@ preferences {
 
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
+        input "minimumOffTime", "decimal", title: "Minimum amount of below wattage time to trigger off (secs)", required: false, defaultValue: 60
         input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
 	}
 	
@@ -72,20 +73,35 @@ def powerInputHandler(evt) {
     	atomicState.isRunning = true
 		atomicState.startedAt = now()
         atomicState.stoppedAt = null
+        atomicState.midCycleCheck = null
         log.trace "Cycle started."
     } else if (atomicState.isRunning && latestPower < minimumWattage) {
-    	atomicState.isRunning = false
-        atomicState.stoppedAt = now()  
-        log.debug "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"                    
-        log.info message
-
-        if (phone) {
-            sendSms phone, message
-        } else {
-            sendPush message
+    	if (atomicState.midCycleCheck == null)
+        {
+        	atomicState.midCycleCheck = true
+            atomicState.midCycleTime = now()
         }
-        
-        speechAlert(message)
+        else if (atomicState.midCycleCheck == true)
+        {
+        	// Time between first check and now  
+            if (now() - atomicState.midCycleTime > minimumOffTime)
+            {
+            	atomicState.isRunning = false
+                atomicState.stoppedAt = now()  
+                log.debug "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"                    
+                log.info message
+
+                if (phone) {
+                    sendSms phone, message
+                } else {
+                    sendPush message
+                }
+
+                if (speech) { 
+                    speechAlert(message) 
+                }           
+            }
+        }             	
     }
     else {
     	// Do Nothing, no change in either direction
