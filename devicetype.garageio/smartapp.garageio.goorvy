@@ -1,11 +1,12 @@
 /**
- *  GarageioServiceMgr v1.1
+ *  GarageioServiceMgr v1.1.1
  *		
  * 		Changelog
- *			v1.1 - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
+ 			v1.1.1 - Tiny fix for service manager failing to complete
+ *			v1.1   - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
  *				   polling, and ST suggested implementation.
- *			v1.0 - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
- *			v0.1 - Initial working integration
+ *			v1.0   - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
+ *			v0.1   - Initial working integration
  *
  *  Copyright 2015 Brandon Miller
  *
