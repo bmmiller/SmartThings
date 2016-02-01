@@ -1,7 +1,7 @@
 /**
  *  Laundry Monitor
  *
- *  Copyright 2014 Brandon Miller
+ *  Copyright 2016 Brandon Miller
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -32,8 +32,9 @@ preferences {
 	}
     
     section("Notifications") {
-		input "sendPushMessage", "bool", title: "Push Notifications?"
-		input "phone", "phone", title: "Send a text message?", required: false      
+		input "push", "bool", title: "Push Notifications?"
+		input "phone", "phone", title: "Send a text message?", required: false
+            paragraph "For multiple SMS recipients, separate phone numbers with a semicolon(;)"      
 	}
 
 	section("System Variables"){
@@ -90,10 +91,18 @@ def powerInputHandler(evt) {
                 atomicState.stoppedAt = now()  
                 log.debug "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"                    
                 log.info message
-
+                
                 if (phone) {
-                    sendSms phone, message
-                } else {
+                    if ( phone.indexOf(";") > 1){
+                        def phones = phone.split(";")
+                        for ( def i = 0; i < phones.size(); i++) {
+                            sendSms(phones[i], message)
+                        }
+                    } else {
+                        sendSms(phone, message)
+                    }
+                
+                if (push) {
                     sendPush message
                 }
 				
