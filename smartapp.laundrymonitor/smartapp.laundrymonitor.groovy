@@ -101,6 +101,7 @@ def powerInputHandler(evt) {
                     } else {
                         sendSms(phone, message)
                     }
+                }
                 
                 if (push) {
                     sendPush message
