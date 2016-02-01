@@ -32,7 +32,7 @@ preferences {
 	}
     
     section("Notifications") {
-		input "push", "bool", title: "Push Notifications?"
+		input "sendPushMessage", "bool", title: "Push Notifications?"
 		input "phone", "phone", title: "Send a text message?", required: false
             paragraph "For multiple SMS recipients, separate phone numbers with a semicolon(;)"      
 	}
@@ -103,7 +103,7 @@ def powerInputHandler(evt) {
                     }
                 }
                 
-                if (push) {
+                if (sendPushMessage) {
                     sendPush message
                 }
 				
