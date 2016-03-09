@@ -16,6 +16,7 @@ You should be given the choice of doors on your account that you want to control
 
 <h3>Changelog</h3>
 <ul>
+  <li>v1.2   - Added multiAttributeTile() to make things look prettier. No functionality change.
   <li>v1.1.1 - Tiny fix for service manager failing to complete
   <li>v1.1   - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, polling, and ST suggested implementation.</li>
   <li>v1.0   - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while</li>
