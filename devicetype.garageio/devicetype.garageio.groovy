@@ -1,12 +1,14 @@
 /**
- *  Garageio Device v1.2 - 2016-03-09
+ *  Garageio Device v1.3 - 2016-03-10
  *
  * 		Changelog
- *			v1.2 - Added multiAttributeTile() to make things look prettier. No functionality change.
- *			v1.1 - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
- *				   polling, and ST suggested implementation.
- *			v1.0 - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
- *			v0.1 - Initial working integration
+ *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
+ *			v1.2    - Added multiAttributeTile() to make things look prettier. No functionality change.
+ *			v1.1.1 	- Tiny fix for service manager failing to complete
+ *			v1.1    - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
+ *				    polling, and ST suggested implementation.
+ *			v1.0    - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
+ *			v0.1    - Initial working integration
  *
  *  Copyright 2016 Brandon Miller
  *

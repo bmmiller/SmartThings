@@ -16,6 +16,7 @@ You should be given the choice of doors on your account that you want to control
 
 <h3>Changelog</h3>
 <ul>
+  <li>v1.3   - Added watchdogTask() to restart polling if it stops, inspiration from Pollster
   <li>v1.2   - Added multiAttributeTile() to make things look prettier. No functionality change.
   <li>v1.1.1 - Tiny fix for service manager failing to complete
   <li>v1.1   - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, polling, and ST suggested implementation.</li>
