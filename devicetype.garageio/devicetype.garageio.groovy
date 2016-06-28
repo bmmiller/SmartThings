@@ -2,6 +2,7 @@
  *  Garageio Device v1.3 - 2016-03-10
  *
  * 		Changelog
+ *			v1.3.1	- Added Garage Door Control capability so it will be usable for standard Garage Door SmartApps
  *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
  *			v1.2    - Added multiAttributeTile() to make things look prettier. No functionality change.
  *			v1.1.1 	- Tiny fix for service manager failing to complete
@@ -29,6 +30,7 @@ metadata {
         capability "Sensor"
         capability "Polling"
         capability "Switch"
+        capability "Garage Door Control"
             
         attribute "status", "string"
 
