@@ -30,10 +30,10 @@ definition(
     namespace: "bmmiller",
     author: "Brandon Miller",
     description: "Initializes and sets up child devices (doors) and polls Garageio devices (doors)",
-    category: "My Apps",
-    iconUrl: "https://raw.githubusercontent.com/bmmiller/SmartThings/master/devicetype.garageio/garageio.png",
-    iconX2Url: "https://raw.githubusercontent.com/bmmiller/SmartThings/master/devicetype.garageio/garageio.png",
-    iconX3Url: "https://raw.githubusercontent.com/bmmiller/SmartThings/master/devicetype.garageio/garageio.png")
+    category: "Convenience",
+    iconUrl: "https://raw.githubusercontent.com/bmmiller/SmartThings/blob/master/Garageio/garageio.png",
+    iconX2Url: "https://raw.githubusercontent.com/bmmiller/SmartThings/blob/master/Garageio/garageio.png",
+    iconX3Url: "https://raw.githubusercontent.com/bmmiller/SmartThings/blob/master/Garageio/garageio.png")
 
 
 preferences {
