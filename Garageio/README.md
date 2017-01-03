@@ -1,4 +1,4 @@
-<h1>Garagio Integration For SmartThings</h1>
+<h1>Garageio Integration For SmartThings</h1>
 Here within lies a service manager and device handler for controlling Garageio controlled doors from within SmartThings.  All existing functionality for SmartThings typed garage doors is included and thus Garageio controlled doors can be utilized with any and all SmartThings Garage Door SmartApps.
 
 <h3>Manual Installation</h3>
