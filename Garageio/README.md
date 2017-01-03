@@ -1,11 +1,13 @@
 <h1>Garagio Integration For SmartThings</h1>
 Here within lies a service manager and device handler for controlling Garageio controlled doors from within SmartThings.  All existing functionality for SmartThings typed garage doors is included and thus Garageio controlled doors can be utilized with any and all SmartThings Garage Door SmartApps.
 
-<h3>Installation</h3>
+<h3>Manual Installation</h3>
 Step 1.
+Device Type Code: https://github.com/bmmiller/SmartThings/blob/master/devicetypes/bmmiller/garageio-device.src/garageio-device.groovy
 Add device type through https://ide.smartthings.com
 
 Step 2. 
+Service Manager Code: https://github.com/bmmiller/SmartThings/blob/master/smartapps/bmmiller/garageioservicemgr.src/garageioservicemgr.groovy
 Add smart app through https://ide.smarthings.com
 
 Step 3.
