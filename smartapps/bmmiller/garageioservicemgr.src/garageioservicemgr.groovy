@@ -325,7 +325,7 @@ def push(doorId, changeState) {
 }
 
 def watchdogTask() {
-    LOG("watchdogTask()")
+    log.info "watchdogTask()"
 
     if (settings.givenInterval && atomicState.lastpoll) {
         def t = now() - atomicState.lastpoll
