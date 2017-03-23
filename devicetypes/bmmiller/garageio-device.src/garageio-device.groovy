@@ -2,6 +2,7 @@
  *  Garageio Device v1.3 - 2016-03-10
  *
  * 		Changelog
+ *          v1.3.2  - Update for new SmartThings blue dominant theme
  *			v1.3.1	- Added Garage Door Control capability so it will be usable for standard Garage Door SmartApps
  *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
  *			v1.2    - Added multiAttributeTile() to make things look prettier. No functionality change.
@@ -42,10 +43,10 @@ metadata {
     tiles(scale: 2) {
     	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
             tileAttribute("device.status", key: "PRIMARY_CONTROL") {           
-                attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "push", backgroundColor:"#44b621", nextState:"opening")
-                attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "push", backgroundColor:"#ff8426", nextState:"closing")
-                attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
-				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
+                attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "push", backgroundColor:"#00a0dc", nextState:"opening")
+                attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "push", backgroundColor:"#e86d13", nextState:"closing")
+                attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#e86d13")
+				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#e86d13")
             }
             
             tileAttribute("device.status", key: "SECONDARY_CONTROL") {
