@@ -1,7 +1,11 @@
 /**
- *  Laundry Monitor
+ *  Laundry Monitor v1.1 - 2017-03-27
  *
- *  Copyright 2016 Brandon Miller
+ *		Changelog
+ *			v1.1 	- Added minimumOnTime, works better for faster reporting power meters
+ *			v1.0	- Initial releases never versioned
+ *
+ *  Copyright 2017 Brandon Miller
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -20,7 +24,7 @@ definition(
     name: "Laundry Monitor",
     namespace: "bmmiller",
     author: "Brandon Miller",
-    description: "This application is a modification of the SmartThings Laundry Monitor SmartApp.  Instead of using a vibration sensor, this utilizes Power (Wattage) draw from an Aeon Smart Energy Meter.",
+    description: "Monitor power usage for laundry machines and notify when cycle end has been detected.",
     category: "Convenience",
     iconUrl: "http://www.vivevita.com/wp-content/uploads/2009/10/recreation_sign_laundry.png",
     iconX2Url: "http://www.vivevita.com/wp-content/uploads/2009/10/recreation_sign_laundry.png")
@@ -39,6 +43,7 @@ preferences {
 
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
+        input "minimumOnTime", "decimal", title: "Minimum amount of above wattage time to signal cycle start (secs)", required: false, defaultValue: 60
         input "minimumOffTime", "decimal", title: "Minimum amount of below wattage time to trigger off (secs)", required: false, defaultValue: 60
         input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
 	}
@@ -70,26 +75,35 @@ def powerInputHandler(evt) {
 	def latestPower = sensor1.currentValue("power")
     log.trace "Power: ${latestPower}W"
     
-    if (!atomicState.isRunning && latestPower > minimumWattage) {
-    	atomicState.isRunning = true
-		atomicState.startedAt = now()
-        atomicState.stoppedAt = null
-        atomicState.midCycleCheck = null
+    // Null state, nothing has happened in a while
+    if (!state.isRunning && latestPower > minimumWattage && state.startedAt == null) {
+    	state.isRunning = true
+    	state.startedAt = now()
+        state.stoppedAt = null
+        state.midCycleCheck = null
+        state.realStart = false
+    }
+    // Confirming a real cycle start and not a wrinkle cycle or random power spike
+    else if (state.isRunning && latestPower > minimumWattage && ((now() - state.startedAt)/1000 > minimumOnTime)) {
+        state.realStart = true
         log.trace "Cycle started."
-    } else if (atomicState.isRunning && latestPower < minimumWattage) {
-    	if (atomicState.midCycleCheck == null)
+    }
+    // Cycle has started, power has dipped below minimum watt threshold
+    else if (state.isRunning && latestPower < minimumWattage && state.realStart) {
+    	if (state.midCycleCheck == null)
         {
-        	atomicState.midCycleCheck = true
-            atomicState.midCycleTime = now()
+        	state.midCycleCheck = true
+            state.midCycleTime = now()
         }
-        else if (atomicState.midCycleCheck == true)
+        else if (state.midCycleCheck == true)
         {
         	// Time between first check and now  
-            if ((now() - atomicState.midCycleTime)/1000 > minimumOffTime)
+            if ((now() - state.midCycleTime)/1000 > minimumOffTime)
             {
-            	atomicState.isRunning = false
-                atomicState.stoppedAt = now()  
-                log.debug "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"                    
+            	state.isRunning = false                
+                state.stoppedAt = now()  
+                log.debug "startedAt: ${state.startedAt}, stoppedAt: ${state.stoppedAt}"      
+                state.startedAt = null
                 log.info message
                 
                 if (phone) {
@@ -115,6 +129,11 @@ def powerInputHandler(evt) {
                 }          
             }
         }             	
+    } 
+    // False start, reset
+    else if (state.isRunning && latestPower < minimumWattage && !state.realStart) { 	
+        state.isRunning = false
+        state.startedAt = null
     }
 }
 
