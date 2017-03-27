@@ -18,8 +18,8 @@ definition(
     author: "florianz",
     description: "API access for Dashing dashboards.",
     category: "Convenience",
-    iconUrl: "https://dl.dropboxusercontent.com/u/3666885/hadashboard-icon.png",
-    iconX2Url: "https://dl.dropboxusercontent.com/u/3666885/hadashboard-icon.png",
+    iconUrl: "http://res.cloudinary.com/dmerj1afs/image/upload/v1490651301/hadashboard-icon_uw77s9.png",
+    iconX2Url: "http://res.cloudinary.com/dmerj1afs/image/upload/v1490651301/hadashboard-icon_uw77s9.png",
     oauth: true) {
 }
 
