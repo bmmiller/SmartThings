@@ -69,41 +69,47 @@ def updated() {
 
 def initialize() {
 	subscribe(sensor1, "power", powerInputHandler)
+    atomicState.startedAt = null
+    atomicState.stoppedAt = null
+    atmoicState.midCycleTime = null
+    atomicState.isRunning = false
+    atomicState.realStart = false
+    atomicState.midCycleCheck = false
 }
 
 def powerInputHandler(evt) {
 	def latestPower = sensor1.currentValue("power")
-    log.trace "Power: ${latestPower}W"
-    
-    // Null state, nothing has happened in a while
-    if (!state.isRunning && latestPower > minimumWattage && state.startedAt == null) {
-    	state.isRunning = true
-    	state.startedAt = now()
-        state.stoppedAt = null
-        state.midCycleCheck = null
-        state.realStart = false
+    // Null atomicState, nothing has happened in a while
+    if ((!atomicState.isRunning || atomicState.isRunning == null) && latestPower > minimumWattage && atomicState.startedAt == null) {
+    	atomicState.isRunning = true
+    	atomicState.startedAt = now()
+        atomicState.stoppedAt = null
+        atomicState.midCycleCheck = null
+        atomicState.realStart = false
+        log.trace "Machine has woken up from slumber."
     }
     // Confirming a real cycle start and not a wrinkle cycle or random power spike
-    else if (state.isRunning && latestPower > minimumWattage && ((now() - state.startedAt)/1000 > minimumOnTime)) {
-        state.realStart = true
-        log.trace "Cycle started."
+    else if (atomicState.isRunning && latestPower > minimumWattage && ((now() - atomicState.startedAt)/1000 > minimumOnTime) && !atomicState.realStart) {
+        atomicState.realStart = true
+        log.trace "Cycle started at ${atomicState.startedAt}"
     }
     // Cycle has started, power has dipped below minimum watt threshold
-    else if (state.isRunning && latestPower < minimumWattage && state.realStart) {
-    	if (state.midCycleCheck == null)
+    else if (atomicState.isRunning && latestPower < minimumWattage && atomicState.realStart) {
+    	if (atomicState.midCycleCheck == null)
         {
-        	state.midCycleCheck = true
-            state.midCycleTime = now()
+        	atomicState.midCycleCheck = true
+            atomicState.midCycleTime = now()
         }
-        else if (state.midCycleCheck == true)
+        else if (atomicState.midCycleCheck == true)
         {
         	// Time between first check and now  
-            if ((now() - state.midCycleTime)/1000 > minimumOffTime)
+            if ((now() - atomicState.midCycleTime)/1000 > minimumOffTime)
             {
-            	state.isRunning = false                
-                state.stoppedAt = now()  
-                log.debug "startedAt: ${state.startedAt}, stoppedAt: ${state.stoppedAt}"      
-                state.startedAt = null
+            	atomicState.isRunning = false                
+                atomicState.stoppedAt = now()  
+                log.trace "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"      
+                atomicState.startedAt = null
+                atomicState.realStart = false
                 log.info message
                 
                 if (phone) {
@@ -131,9 +137,9 @@ def powerInputHandler(evt) {
         }             	
     } 
     // False start, reset
-    else if (state.isRunning && latestPower < minimumWattage && !state.realStart) { 	
-        state.isRunning = false
-        state.startedAt = null
+    else if (atomicState.isRunning && latestPower < minimumWattage && !atomicState.realStart) { 	
+        atomicState.isRunning = false
+        atomicState.startedAt = null
     }
 }
 
