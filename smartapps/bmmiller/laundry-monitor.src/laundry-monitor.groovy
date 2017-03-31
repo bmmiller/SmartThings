@@ -1,7 +1,8 @@
 /**
- *  Laundry Monitor v1.1 - 2017-03-30
+ *  Laundry Monitor v1.3 - 2017-03-31
  *
  *		Changelog
+ *          v1.3    - Fixes for mid-cycle checks
  *			v1.2	- Switch to ST Contact Book for notifications
  *			v1.1 	- Added minimumOnTime, works better for faster reporting power meters
  *			v1.0	- Initial releases never versioned
@@ -76,7 +77,6 @@ def initialize() {
     atomicState.midCycleTime = null
     atomicState.isRunning = false
     atomicState.realStart = false
-    atomicState.midCycleCheck = false
 }
 
 def powerInputHandler(evt) {
@@ -86,7 +86,7 @@ def powerInputHandler(evt) {
     	atomicState.isRunning = true
     	atomicState.startedAt = now()
         atomicState.stoppedAt = null
-        atomicState.midCycleCheck = null
+        atomicState.midCycleTime = null
         atomicState.realStart = false
         log.trace "Machine has woken up from slumber."
     }
@@ -97,12 +97,11 @@ def powerInputHandler(evt) {
     }
     // Cycle has started, power has dipped below minimum watt threshold
     else if (atomicState.isRunning && latestPower < minimumWattage && atomicState.realStart) {
-    	if (atomicState.midCycleCheck == null)
+    	if (atomicState.midCycleTime == null)
         {
-        	atomicState.midCycleCheck = true
             atomicState.midCycleTime = now()
         }
-        else if (atomicState.midCycleCheck == true)
+        else
         {
         	// Time between first check and now  
             if ((now() - atomicState.midCycleTime)/1000 > minimumOffTime)
@@ -112,6 +111,8 @@ def powerInputHandler(evt) {
                 log.trace "startedAt: ${atomicState.startedAt}, stoppedAt: ${atomicState.stoppedAt}"      
                 atomicState.startedAt = null
                 atomicState.realStart = false
+                atomicState.midCycleTime = null
+                
                 log.info message
                 
                 if (location.contactBookEnabled && recipients) {
@@ -133,6 +134,10 @@ def powerInputHandler(evt) {
             }
         }             	
     } 
+    // Reset midCycleTime if we started back up
+    else if (atomicState.isRunning && latestPower > minimumWattage && atomicState.realStart) {
+        atomicState.midCycleTime = null
+    }
     // False start, reset
     else if (atomicState.isRunning && latestPower < minimumWattage && !atomicState.realStart) { 	
         atomicState.isRunning = false
