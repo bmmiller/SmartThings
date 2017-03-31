@@ -1,7 +1,8 @@
 /**
- *  GarageioServiceMgr v1.3 - 2016-03-10
+ *  GarageioServiceMgr v1.4 - 2017-03-30
  *		
  * 		Changelog
+ *			v1.4	- Minor tweaks
  *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
  *			v1.2 	- Added multiAttributeTile() to make things look prettier. No functionality change.
  *			v1.1.1 	- Tiny fix for service manager failing to complete
@@ -10,7 +11,7 @@
  *			v1.0   	- GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
  *			v0.1   	- Initial working integration
  *
- *  Copyright 2016 Brandon Miller
+ *  Copyright 2017 Brandon Miller
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -49,7 +50,7 @@ def about() {
 			paragraph "GarageioServiceMgr, the smartapp that initializes your Garageio device (doors) and polls them on a regular basis"
 			paragraph "Version 1.3\n\n" +
 				"If you like this app, please support the developer via PayPal:\nbmmiller@gmail.com\n\n" +
-				"Copyright©2016 Brandon Miller"
+				"Copyright©2017 Brandon Miller"
 			href url: "http://github.com/bmmiller", style: "embedded", required: false, title: "More information..."
 		} 
 	}        
@@ -107,8 +108,8 @@ def getGarageioDoors() {
     		}            
     }
     catch (e) {
-		state?.msg= "exception $e while getting list of Doors" 
-		log.error state.msg        
+		atomicState?.msg= "exception $e while getting list of Doors" 
+		log.error atomicState.msg        
     }      
 
 	return doors
@@ -118,11 +119,6 @@ def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
     	section("Polling at which interval in minutes (range=[5..59],default=30 min.)?") {
 			input "givenInterval", "number", title:"Interval", required: false
-		}
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-				false
-			input "phoneNumber", "phone", title: "Send a text message?", required: false
 		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
@@ -203,15 +199,15 @@ private def create_child_devices() {
 def initialize() {
 	log.debug "initialize"
     atomicState.lastpoll = 0
-	state?.exceptionCount = 0
-	state?.msg=null    
+	atomicState?.exceptionCount = 0
+	atomicState?.msg=null    
 	delete_child_devices()	
 	create_child_devices() 
     
     Integer delay = givenInterval ?: 30 // By default, do it every 30 min.
 	if ((delay < 5) || (delay>59)) {
-		state?.msg= "GarageioServiceMgr> scheduling interval not in range (${delay} min), exiting..."
-		log.debug state.msg
+		atomicState?.msg= "GarageioServiceMgr> scheduling interval not in range (${delay} min), exiting..."
+		log.debug atomicState.msg
 		runIn(30, "sendMsgWithDelay")
  		return
 	}
@@ -236,24 +232,24 @@ def takeAction() {
 			if (((exceptionCheck.contains("exception") || (exceptionCheck.contains("error"))) && 
 				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
 				// check if there is any exception reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
-				state.exceptionCount=state.exceptionCount+1    
-				log.error "found exception after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck"
+				atomicState.exceptionCount=atomicState.exceptionCount+1    
+				log.error "found exception after polling, exceptionCount= ${atomicState?.exceptionCount}: $exceptionCheck"
             } else {             
 				// reset exception counter            
-				state?.exceptionCount=0   
+				atomicState?.exceptionCount=0   
 			} 
 		} catch (e) {       
-            //state?.exceptionCount=state?.exceptionCount+1
-			//log.error "GarageioServiceMgr> exception $e while trying to poll the device $dni, exceptionCount= ${state?.exceptionCount}" 
+            //atomicState?.exceptionCount=atomicState?.exceptionCount+1
+			//log.error "GarageioServiceMgr> exception $e while trying to poll the device $dni, exceptionCount= ${atomicState?.exceptionCount}" 
 		}    
         
-        if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+        if (atomicState?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 			// need to re-authenticate again    
 			atomicState.token = null                    
-			msg = "GarageioServiceMgr> too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at Garageio..." 
+			msg = "GarageioServiceMgr> too many exceptions/errors or unauthorized exception, $exceptionCheck (${atomicState?.exceptionCount} errors), need to re-authenticate at Garageio..." 
 			log.error msg
 			send msg
-           getAuthToken()
+            getAuthToken()
 		}
 	}
     log.trace "takeAction> end"
@@ -284,15 +280,15 @@ def pollChildren() {
                 	return response.data.data.devices[0].doors 
                 } else if (response.status == GARAGEIO_AUTH_ERROR) {
                 	// Need to re-auth
-                    state?.msg="Need to re-authenticate, calling getAuthToken()"
-                    log.error state.msg
+                    atomicState?.msg="Need to re-authenticate, calling getAuthToken()"
+                    log.error atomicState.msg
                     getAuthToken()
                 }
             }            
     }
     catch (e) { 	
-		state?.msg= "exception $e while getting list of Doors" 
-		log.error state.msg        
+		atomicState?.msg= "exception $e while getting list of Doors" 
+		log.error atomicState.msg        
     }
 }
 

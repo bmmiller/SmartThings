@@ -35,7 +35,10 @@ preferences {
 		input "presences", "capability.presenceSensor", title: "Presence sensor", description: "Which presence sensor(s)?", multiple: true, required: false
 	}   
     section ("Notifications") {
-    	input "sendPushMessage", "bool", title: "Push Notifications?"
+    	input("recipients", "contact", title: "Send notifications to") {
+            input "phone", "phone", title: "Warn with text message (optional)",
+                description: "Phone Number", required: false
+        }
         input "openThreshold", "number", title: "Warn when open longer than...",description: "Number of minutes", required: false
     }
 	section("False alarm threshold (defaults to 10 min)") {
@@ -76,8 +79,15 @@ def doorOpenCheck()
 				def msg = "${doorSwitch.displayName} was been open for ${thresholdMinutes} minutes"
 				log.info msg
                 
-				if (sendPushMessage)
-                	sendPush msg		
+				if (location.contactBookEnabled && recipients) {
+                    log.debug "Contact Book enabled!"
+                    sendNotificationToContacts(message, recipients)
+                } else {
+                    log.debug "Contact Book not enabled"
+                    if (phone) {
+                        sendSms(phone, message)
+                    }
+                }		
                     
 				state.openDoorNotificationSent = true
 			}
@@ -104,7 +114,15 @@ def carPresence(evt)
 		else {
 			if (doorSensor.currentContact == "closed") {
 				openDoor()
-				sendPush "Opening garage door due to arrival of ${car.displayName}"
+                if (location.contactBookEnabled && recipients) {
+                    log.debug "Contact Book enabled!"
+                    sendNotificationToContacts("Opening garage door due to arrival of ${car.displayName}", recipients)
+                } else {
+                    log.debug "Contact Book not enabled"
+                    if (phone) {
+                        sendSms(phone, "Opening garage door due to arrival of ${car.displayName}")
+                    }
+                }
 				state.appOpenedDoor = now()
 			}
 			else {
@@ -122,8 +140,7 @@ def garageDoorContact(evt)
 	}
 	else {
 		unschedule("doorOpenCheck")
-        state.openDoorNotificationSent = false
-        
+        state.openDoorNotificationSent = false      
 	}
 }
 
