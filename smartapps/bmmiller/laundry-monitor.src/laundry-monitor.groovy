@@ -1,7 +1,8 @@
 /**
- *  Laundry Monitor v1.1 - 2017-03-27
+ *  Laundry Monitor v1.1 - 2017-03-30
  *
  *		Changelog
+ *			v1.2	- Switch to ST Contact Book for notifications
  *			v1.1 	- Added minimumOnTime, works better for faster reporting power meters
  *			v1.0	- Initial releases never versioned
  *
@@ -35,17 +36,18 @@ preferences {
 		input "sensor1", "capability.powerMeter"
 	}
     
-    section("Notifications") {
-		input "sendPushMessage", "bool", title: "Push Notifications?"
-		input "phone", "phone", title: "Send a text message?", required: false
-            paragraph "For multiple SMS recipients, separate phone numbers with a semicolon(;)"      
+    section("Notifications") {     
+        input("recipients", "contact", title: "Send notifications to") {
+            input "phone", "phone", title: "Warn with text message (optional)",
+                description: "Phone Number", required: false
+        }
+        input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
 	}
 
 	section("System Variables"){
     	input "minimumWattage", "decimal", title: "Minimum running wattage", required: false, defaultValue: 50
         input "minimumOnTime", "decimal", title: "Minimum amount of above wattage time to signal cycle start (secs)", required: false, defaultValue: 60
         input "minimumOffTime", "decimal", title: "Minimum amount of below wattage time to trigger off (secs)", required: false, defaultValue: 60
-        input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
 	}
 	
 	section ("Additionally", hidden: hideOptionsSection(), hideable: true) {
@@ -71,7 +73,7 @@ def initialize() {
 	subscribe(sensor1, "power", powerInputHandler)
     atomicState.startedAt = null
     atomicState.stoppedAt = null
-    atmoicState.midCycleTime = null
+    atomicState.midCycleTime = null
     atomicState.isRunning = false
     atomicState.realStart = false
     atomicState.midCycleCheck = false
@@ -112,19 +114,14 @@ def powerInputHandler(evt) {
                 atomicState.realStart = false
                 log.info message
                 
-                if (phone) {
-                    if ( phone.indexOf(";") > 1){
-                        def phones = phone.split(";")
-                        for ( def i = 0; i < phones.size(); i++) {
-                            sendSms(phones[i], message)
-                        }
-                    } else {
+                if (location.contactBookEnabled && recipients) {
+                    log.debug "Contact Book enabled!"
+                    sendNotificationToContacts(message, recipients)
+                } else {
+                    log.debug "Contact Book not enabled"
+                    if (phone) {
                         sendSms(phone, message)
                     }
-                }
-                
-                if (sendPushMessage) {
-                    sendPush message
                 }
 				
                 if (switches) {
