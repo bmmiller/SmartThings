@@ -96,7 +96,7 @@ mappings {
             POST: "postDimmer"
         ]
     }
-    path("/dimmerLevel") {
+    path("/dimmer/level") {
         action: [
             POST: "dimmerLevel"
         ]
@@ -163,7 +163,8 @@ def initialize() {
     subscribe(location, locationHandler)
     subscribe(locks, "lock", lockHandler)
     subscribe(motions, "motion", motionHandler)
-    subscribe(meters, "power", meterHandler)
+    subscribe(meters, "power", meterPowerHandler)
+	subscribe(meters, "energy", meterEnergyHandler)
     subscribe(presences, "presence", presenceHandler)
     subscribe(dimmers, "switch", dimmerSwitch)
     subscribe(dimmers, "level", dimmerHandler)
@@ -287,22 +288,29 @@ def getPower() {
         } else {
             return [
                 "deviceId": deviceId,
-                "value": whichMeter.currentValue("power")]
+                "power": whichMeter.currentValue("power"),
+				"energy": whichMeter.currentValue("energy")]
         }
     }
 
     def result = [:]
     meters.each {
         result[it.displayName] = [
-            "value": it.currentValue("power"),
+            "power": it.currentValue("power"),	
+			"energy": it.currentValue("energy"),
             "widgetId": state.widgets.power[it.displayName]]}
 
     return result
 }
 
-def meterHandler(evt) {
+def meterPowerHandler(evt) {
     def widgetId = state.widgets.power[evt.displayName]
-    notifyWidget(widgetId, ["value": evt.value])
+    notifyWidget(widgetId, ["power": (Math.round(Double.parseDouble(evt.value)))])
+}
+
+def meterEnergyHandler(evt) {
+    def widgetId = state.widgets.power[evt.displayName]
+    notifyWidget(widgetId, ["energy": evt.value])
 }
 
 //
