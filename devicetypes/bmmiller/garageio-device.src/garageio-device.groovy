@@ -1,7 +1,8 @@
 /**
- *  Garageio Device v1.3 - 2016-03-10
+ *  Garageio Device v1.3.3 - 2017-05-07
  *
  * 		Changelog
+ *			v1.3.3	- Compatibility Update
  *          v1.3.2  - Update for new SmartThings blue dominant theme
  *			v1.3.1	- Added Garage Door Control capability so it will be usable for standard Garage Door SmartApps
  *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
@@ -103,11 +104,13 @@ def updateStatus(status) {
     {    	
         sendEvent(name: 'status', value: 'closed')
         sendEvent(name: 'contact', value: 'closed')
+        sendEvent(name: 'state', value: 'closed')
     }
     else if (status == "OPEN")
     {
     	sendEvent(name: 'status', value: 'open')
         sendEvent(name: 'contact', value: 'open')
+        sendEvent(name: 'state', value: 'open')
     }
     log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
     // Now update
