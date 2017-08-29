@@ -36,7 +36,7 @@ preferences {
         input "switches", "capability.switch", title: "Switches", required: false, multiple: true
         input "batteries", "capability.battery", title: "Batteries", required:false, multiple: true
         input "thermostats", "capability.thermostat", title: "Thermostat Setpoints", required: false, multiple: true
-        input "energymeters", "capability.energyMeter", title: "Energy Meters", required: false, multiple: true
+        input "energymeters", "capability.powerMeter", title: "Energy Meters", required: false, multiple: true
     }
     section ("Graphite (Backstop) Server") {
     	input "backstop_host", "text", title: "Backstop Hostname/IP"
