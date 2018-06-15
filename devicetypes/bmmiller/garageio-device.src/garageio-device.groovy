@@ -2,6 +2,7 @@
  *  Garageio Device v1.3.3 - 2017-05-07
  *
  * 		Changelog
+ *			v1.4	- Fixes for ActionTiles compatibility
  *			v1.3.3	- Compatibility Update
  *          v1.3.2  - Update for new SmartThings blue dominant theme
  *			v1.3.1	- Added Garage Door Control capability so it will be usable for standard Garage Door SmartApps
@@ -9,7 +10,7 @@
  *			v1.2    - Added multiAttributeTile() to make things look prettier. No functionality change.
  *			v1.1.1 	- Tiny fix for service manager failing to complete
  *			v1.1    - GarageioServiceMgr() and Device Handler impplemented to handle ChildDevice creation, deletion, 
- *				    polling, and ST suggested implementation.
+ *				      polling, and ST suggested implementation.
  *			v1.0    - GarageioInit() implementation to handle polling in a Smart App, left this way for quite a while
  *			v0.1    - Initial working integration
  *
@@ -32,20 +33,18 @@ metadata {
         capability "Sensor"
         capability "Polling"
         capability "Switch"
+        capability "Actuator"
+        capability "Door Control"
         capability "Garage Door Control"
             
         attribute "status", "string"
-
-        command "push"
-        command "open"
-        command "close"
     }
     
     tiles(scale: 2) {
     	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
             tileAttribute("device.status", key: "PRIMARY_CONTROL") {           
-                attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "push", backgroundColor:"#00a0dc", nextState:"opening")
-                attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "push", backgroundColor:"#e86d13", nextState:"closing")
+                attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "open", backgroundColor:"#00a0dc", nextState:"opening")
+                attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "close", backgroundColor:"#e86d13", nextState:"closing")
                 attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#e86d13")
 				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#e86d13")
             }
@@ -57,10 +56,10 @@ metadata {
     	}    
         
         standardTile("open", "device.door", decoration: "flat", width: 2, height: 2) {
-			state "default", label:'open', action:"push", icon:"st.doors.garage.garage-opening"
+			state "default", label:'open', action:"open", icon:"st.doors.garage.garage-opening"
 		}
 		standardTile("close", "device.door", decoration: "flat", width: 2, height: 2) {
-			state "default", label:'close', action:"push", icon:"st.doors.garage.garage-closing"
+			state "default", label:'close', action:"close", icon:"st.doors.garage.garage-closing"
 		}
         
         standardTile("contact", "device.contact") {
@@ -120,7 +119,9 @@ def updateStatus(status) {
 def open() {
 	if (state.status == "CLOSED") {
     	log.debug "open(): Opening door"
-		push()
+        push()
+        sendEvent(name: "door", value: "open")
+    	sendEvent(name: "contact", value: "open")
     } else {
         log.debug "We're already open, doing nothing"
     }
@@ -130,6 +131,8 @@ def close() {
 	if (state.status == "OPEN") {
     	log.debug "close(): Closing door"
 		push()
+        sendEvent(name: "door", value: "closed")
+    	sendEvent(name: "contact", value: "closed")
     } else {
     	log.debug "We're already closed, doing nothing"
     }
