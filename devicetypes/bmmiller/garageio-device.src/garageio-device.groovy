@@ -1,5 +1,5 @@
 /**
- *  Garageio Device v1.3.3 - 2017-05-07
+ *  Garageio Device v1.4 - 2018-06-15
  *
  * 		Changelog
  *			v1.4	- Fixes for ActionTiles compatibility
