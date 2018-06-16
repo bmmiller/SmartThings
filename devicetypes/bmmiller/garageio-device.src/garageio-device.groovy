@@ -1,7 +1,8 @@
 /**
- *  Garageio Device v1.4 - 2018-06-15
+ *  Garageio Device v1.4.1 - 2018-06-15
  *
  * 		Changelog
+ *			v1.4.1	- Another small fix for polling and ActionTiles
  *			v1.4	- Fixes for ActionTiles compatibility
  *			v1.3.3	- Compatibility Update
  *          v1.3.2  - Update for new SmartThings blue dominant theme
@@ -104,12 +105,14 @@ def updateStatus(status) {
         sendEvent(name: 'status', value: 'closed')
         sendEvent(name: 'contact', value: 'closed')
         sendEvent(name: 'state', value: 'closed')
+        sendEvent(name: 'door', value: 'closed')
     }
     else if (status == "OPEN")
     {
     	sendEvent(name: 'status', value: 'open')
         sendEvent(name: 'contact', value: 'open')
         sendEvent(name: 'state', value: 'open')
+        sendEvent(name: 'door', value: 'open')
     }
     log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
     // Now update
