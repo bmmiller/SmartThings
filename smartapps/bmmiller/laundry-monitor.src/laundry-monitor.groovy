@@ -1,13 +1,14 @@
 /**
- *  Laundry Monitor v1.3 - 2017-03-31
+ *  Laundry Monitor v1.4 - 2018-07-23
  *
  *		Changelog
+ *			v1.4	- Kill Contact Book because SmartThings removed the feature
  *          v1.3    - Fixes for mid-cycle checks
  *			v1.2	- Switch to ST Contact Book for notifications
  *			v1.1 	- Added minimumOnTime, works better for faster reporting power meters
  *			v1.0	- Initial releases never versioned
  *
- *  Copyright 2017 Brandon Miller
+ *  Copyright 2018 Brandon Miller
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -37,11 +38,9 @@ preferences {
 		input "sensor1", "capability.powerMeter"
 	}
     
-    section("Notifications") {     
-        input("recipients", "contact", title: "Send notifications to") {
-            input "phone", "phone", title: "Warn with text message (optional)",
-                description: "Phone Number", required: false
-        }
+    section("Notifications") {             
+        input "sendSMS", "phone", title: "Alert with SMS message?",description: "Phone Number", required: false
+        input "sendPush", "bool", required: false, title: "Alert with Push Notification?"
         input "message", "text", title: "Notification message", description: "Laundry is done!", required: true
 	}
 
@@ -115,16 +114,13 @@ def powerInputHandler(evt) {
                 
                 log.info message
                 
-                if (location.contactBookEnabled && recipients) {
-                    log.debug "Contact Book enabled!"
-                    sendNotificationToContacts(message, recipients)
-                } else {
-                    log.debug "Contact Book not enabled"
-                    if (phone) {
-                        sendSms(phone, message)
-                    }
+                
+                if (sendSMS) {
+                    sendSms(phone, message)
                 }
-				
+                if (sendPush) {
+                	sendPush(message)
+                }
                 if (switches) {
           			switches*.on()
       			}               
