@@ -31,18 +31,14 @@
  
 metadata {
 	definition (name: "Garageio Device", namespace: "bmmiller", author: "Brandon Miller") {
-        capability "Contact Sensor"
-        capability "Sensor"
         capability "Polling"
-        capability "Switch"
-        capability "Actuator"
         capability "Door Control"
             
-        attribute "status", "string"
+        //attribute "status", "string"
     }
     
     tiles(scale: 2) {
-    	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
+    	multiAttributeTile(name:"door", type:"generic", width: 6, height: 4) {
             tileAttribute("device.door", key: "PRIMARY_CONTROL") {           
                 attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "open", backgroundColor:"#00a0dc", nextState:"opening")
                 attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "close", backgroundColor:"#e86d13", nextState:"closing")
@@ -62,8 +58,8 @@ metadata {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
 		
-        main(["status"])
-		details(["status","open","close","refresh"])
+        main(["door"])
+		details(["door","open","close","refresh"])
 	}
 }
 
@@ -90,42 +86,34 @@ def parsePollData(results) {
 }
 
 def updateStatus(status) {
+	log.debug "UpdateStatus: ${status}"
 	if (status == "CLOSED")
     {    	
-        sendEvent(name: 'status', value: 'closed')
-        sendEvent(name: 'contact', value: 'closed')
-        sendEvent(name: 'state', value: 'closed')
         sendEvent(name: 'door', value: 'closed')
     }
     else if (status == "OPEN")
     {
-    	sendEvent(name: 'status', value: 'open')
-        sendEvent(name: 'contact', value: 'open')
-        sendEvent(name: 'state', value: 'open')
         sendEvent(name: 'door', value: 'open')
     }
-    log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
-    // Now update
-    state.status = status
 }
 
 def open() {
+	log.debug "Open: ${state}, ${state.status}"
 	if (state.status == "CLOSED") {
     	log.debug "open(): Opening door"
         push()
         sendEvent(name: "door", value: "open")
-    	sendEvent(name: "contact", value: "open")
     } else {
         log.debug "We're already open, doing nothing"
     }
 }
 
 def close() {
+	log.debug "Close: ${state}, ${state.status}"
 	if (state.status == "OPEN") {
     	log.debug "close(): Closing door"
 		push()
         sendEvent(name: "door", value: "closed")
-    	sendEvent(name: "contact", value: "closed")
     } else {
     	log.debug "We're already closed, doing nothing"
     }
