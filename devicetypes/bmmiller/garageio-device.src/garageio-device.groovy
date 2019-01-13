@@ -6,7 +6,7 @@
  *			v1.4.1	- Another small fix for polling and ActionTiles
  *			v1.4	- Fixes for ActionTiles compatibility
  *			v1.3.3	- Compatibility Update
- *          v1.3.2  - Update for new SmartThings blue dominant theme
+ *			v1.3.2  - Update for new SmartThings blue dominant theme
  *			v1.3.1	- Added Garage Door Control capability so it will be usable for standard Garage Door SmartApps
  *			v1.3 	- Added watchdogTask() to restart polling if it stops, inspiration from Pollster
  *			v1.2    - Added multiAttributeTile() to make things look prettier. No functionality change.
@@ -34,17 +34,17 @@ metadata {
         capability "Polling"
         capability "Door Control"
             
-        //attribute "status", "string"
+        attribute "status", "string"
     }
     
     tiles(scale: 2) {
-    	multiAttributeTile(name:"door", type:"generic", width: 6, height: 4) {
+    	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
             tileAttribute("device.door", key: "PRIMARY_CONTROL") {           
                 attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "open", backgroundColor:"#00a0dc", nextState:"opening")
                 attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "close", backgroundColor:"#e86d13", nextState:"closing")
                 attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#e86d13")
 				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#e86d13")
-            }           
+            }
     	}    
         
         standardTile("open", "device.door", decoration: "flat", width: 2, height: 2) {
@@ -58,8 +58,8 @@ metadata {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
 		
-        main(["door"])
-		details(["door","open","close","refresh"])
+        main(["status"])
+		details(["status","open","close","refresh"])
 	}
 }
 
@@ -86,19 +86,24 @@ def parsePollData(results) {
 }
 
 def updateStatus(status) {
-	log.debug "UpdateStatus: ${status}"
 	if (status == "CLOSED")
     {    	
+        sendEvent(name: 'status', value: 'closed')
+        sendEvent(name: 'state', value: 'closed')
         sendEvent(name: 'door', value: 'closed')
     }
     else if (status == "OPEN")
     {
+    	sendEvent(name: 'status', value: 'open')
+        sendEvent(name: 'state', value: 'open')
         sendEvent(name: 'door', value: 'open')
     }
+    log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
+    // Now update
+    state.status = status
 }
 
 def open() {
-	log.debug "Open: ${state}, ${state.status}"
 	if (state.status == "CLOSED") {
     	log.debug "open(): Opening door"
         push()
@@ -109,7 +114,6 @@ def open() {
 }
 
 def close() {
-	log.debug "Close: ${state}, ${state.status}"
 	if (state.status == "OPEN") {
     	log.debug "close(): Closing door"
 		push()
@@ -132,4 +136,3 @@ def push() {
     	log.error "Authentication error, need to get/refresh token."
     }
 }
-
