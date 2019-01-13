@@ -1,7 +1,8 @@
 /**
- *  Garageio Device v1.4.1 - 2018-06-15
+ *  Garageio Device v1.5 - 2019-01-13
  *
  * 		Changelog
+ *			v1.5	- Remove Garage Door Control which was deprecated
  *			v1.4.1	- Another small fix for polling and ActionTiles
  *			v1.4	- Fixes for ActionTiles compatibility
  *			v1.3.3	- Compatibility Update
@@ -36,24 +37,18 @@ metadata {
         capability "Switch"
         capability "Actuator"
         capability "Door Control"
-        capability "Garage Door Control"
             
         attribute "status", "string"
     }
     
     tiles(scale: 2) {
     	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
-            tileAttribute("device.status", key: "PRIMARY_CONTROL") {           
+            tileAttribute("device.door", key: "PRIMARY_CONTROL") {           
                 attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "open", backgroundColor:"#00a0dc", nextState:"opening")
                 attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "close", backgroundColor:"#e86d13", nextState:"closing")
                 attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#e86d13")
 				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#e86d13")
-            }
-            
-            tileAttribute("device.status", key: "SECONDARY_CONTROL") {
-                attributeState("closed", label: '${name}')
-                attributeState("open", label: '${name}')
-            }
+            }           
     	}    
         
         standardTile("open", "device.door", decoration: "flat", width: 2, height: 2) {
@@ -61,11 +56,6 @@ metadata {
 		}
 		standardTile("close", "device.door", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'close', action:"close", icon:"st.doors.garage.garage-closing"
-		}
-        
-        standardTile("contact", "device.contact") {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
 		}
         
         standardTile("refresh", "device", decoration: "flat", width: 2, height: 2) {
