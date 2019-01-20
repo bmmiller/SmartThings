@@ -36,7 +36,8 @@ preferences {
         input "switches", "capability.switch", title: "Switches", required: false, multiple: true
         input "batteries", "capability.battery", title: "Batteries", required:false, multiple: true
         input "thermostats", "capability.thermostat", title: "Thermostat Setpoints", required: false, multiple: true
-        input "energymeters", "capability.powerMeter", title: "Energy Meters", required: false, multiple: true
+        input "energymeters", "capability.powerMeter", title: "Power Meters", required: false, multiple: true
+        input "voltagemeters", "capability.voltageMeter", title: "Voltage Meters", required: false, multiple: true
     }
     section ("Graphite (Backstop) Server") {
     	input "backstop_host", "text", title: "Backstop Hostname/IP"
@@ -153,11 +154,9 @@ def checkSensors() {
         logitems.add([t.displayName + ".power", "smartthings.energy", t.latestValue("power")])
         state[t.displayName + ".Watts"] = t.latestValue("power")
         log.debug("[energy] " + t.displayName + ": " + t.latestValue("power"))
-
-        logitems.add([t.displayName + ".amps", "smartthings.energy", t.latestValue("amps")])
-        state[t.displayName + ".Amps"] = t.latestValue("amps")
-        log.debug("[energy] " + t.displayName + ": " + t.latestValue("amps"))
-
+    }
+    
+    for (t in settings.voltagemeters) {
 		logitems.add([t.displayName + ".volts", "smartthings.energy", t.latestValue("volts")])
         state[t.displayName + ".Volts"] = t.latestValue("volts")
         log.debug("[energy] " + t.displayName + ": " + t.latestValue("volts"))
