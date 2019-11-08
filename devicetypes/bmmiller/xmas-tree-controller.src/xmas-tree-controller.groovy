@@ -1,7 +1,10 @@
 /* 
- *  Xmas Tree Controller v1.0.0 - 2019-01-08
+ *  Xmas Tree Controller v1.5.0 - 2019-10-07
  *
  * 		Changelog
+ *			v1.5.0	- With the new Bond App Removing IFTTT support and adding Local API support, this is a refactor to the Local API instead of utilizing IFTTT.  Requires the new 
+ *					- version of the Bond App, new firmware (v2.9.4 as of today), and a NAT entry in your firewall to the local Bond IP.  Something like port 10000 being forwarded
+ *					- to port 80 of the bond and then the URI in the preferences being the WAN IP of your home/firewall/ISP.
  *			v1.0.0	- Initial push of Xmas Tree Controller Device.  This uses the Bond RF Controller (https://bondhome.io) to attach the Balsam Xmas Tree (https://www.balsamhill.com/) 
  *                  - RF controller as a type of fan with 3 "speeds".  1 being the clear lights setting, 2 being the multi lights setting, and 3 being all lights.  It relies
  *					- on IFTTT integration and enabling of webhooks.  Input your key into the the preferences, and you'll have to create the rules on IFTTT to trigger on
@@ -60,8 +63,14 @@ metadata {
     }
     
     preferences {
-    	input name: "webhookKey", type: "text", title: "Key", description: "Your IFTTT Webhook Key", required: true, displayDuringSetup: true
+    	input name: "uri", type: "text", title: "Endpoint URI", description: "IP/Hostname:PORT", required: true, displayDuringSetup: true
+    	input name: "bondToken", type: "text", title: "BOND-Token", description: "Your BOND Token", required: true, displayDuringSetup: true
+        input name: "deviceId", type: "text", title: "Device ID", description: "Device ID to Control", required: true, displayDuringSetup: true
         input name: "defaultLights", type: "enum", title: "Default Lights", options: ["Clear Lights", "Multi Lights", "All Lights"], description: "Choose a default lighting setup", required: true
+        input name: "offCommandId", type: "text", title: "Off Command Id", description: "Enter your turn off command id", required: true, displayDuringSetup: true
+        input name: "clearLightsCommandId", type: "text", title: "Clear Lights Command Id", description: "Enter your clear lights command id", required: true, displayDuringSetup: true
+        input name: "multiLightsCommandId", type: "text", title: "Multi Lights Command Id", description: "Enter your multi lights command id", required: true, displayDuringSetup: true
+        input name: "allLightsCommandId", type: "text", title: "All Lights Command Id", description: "Enter your all lights command id", required: true, displayDuringSetup: true
 	}
 }
 
@@ -104,27 +113,24 @@ def off() {
     sendEvent(name: "switchClear", value: "off")
     sendEvent(name: "switchMulti", value: "off")
     sendEvent(name: "switchAll", value: "off")
-	sendGetRequest("xmas_tree_off")
+	sendGetRequest("${offCommandId}")
 }
 
-// Will send 20% percentage command to Bond
 def clearLights() {
     sendEvent(name: "switchClear", value: "on")
-	sendGetRequest("xmas_tree_clear")
+	sendGetRequest("${clearLightsCommandId}")
 	syncButtons("clearLights")
 }
 
-// Will send 50% percentage command to Bond
 def multiLights() {
     sendEvent(name: "switchMulti", value: "on")
-	sendGetRequest("xmas_tree_multi")
+	sendGetRequest("${multiLightsCommandId}")
 	syncButtons("multiLights")
 }
 
-// Will send 80% percentage command to Bond
 def allLights() {
 	sendEvent(name: "switchAll", value: "on")	
-	sendGetRequest("xmas_tree_all")
+	sendGetRequest("${allLightsCommandId}")
 	syncButtons("allLights")
 }
 
@@ -149,16 +155,17 @@ private syncButtons(method){
 }
 
 private sendGetRequest(event) {
-	log.debug "sendGetRequest: https://maker.ifttt.com/trigger/${event}/with/key/${webhookKey}"
+	log.debug "sendPutRequest: http://${uri}/v2/devices/${deviceId}/commands/${event}/tx"
+    def params = [
+    	uri: "http://${uri}",
+        path: "/v2/devices/${deviceId}/commands/${event}/tx",
+        headers: ["BOND-Token":"${bondToken}"],
+        body: "{}"
+    ]
+
     try
 	{
-		httpGet("https://maker.ifttt.com/trigger/${event}/with/key/${webhookKey}") { resp ->
-			resp.headers.each {
-			   log.debug "${it.name} : ${it.value}"
-			}
-			log.debug "response contentType: ${resp.contentType}"
-			log.debug "response data: ${resp.data}"
-		}
+		httpPut(params) { }
 	}
 	catch (e) {
 		log.error "Something went wrong: $e"
