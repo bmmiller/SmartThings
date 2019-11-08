@@ -1,17 +1,17 @@
 /* 
  *  Xmas Tree Controller v1.5.0 - 2019-10-07
  *
- * 		Changelog
- *			v1.5.0	- With the new Bond App Removing IFTTT support and adding Local API support, this is a refactor to the Local API instead of utilizing IFTTT.  Requires the new 
- *					- version of the Bond App, new firmware (v2.9.4 as of today), and a NAT entry in your firewall to the local Bond IP.  Something like port 10000 being forwarded
- *					- to port 80 of the bond and then the URI in the preferences being the WAN IP of your home/firewall/ISP.
- *			v1.0.0	- Initial push of Xmas Tree Controller Device.  This uses the Bond RF Controller (https://bondhome.io) to attach the Balsam Xmas Tree (https://www.balsamhill.com/) 
- *                  - RF controller as a type of fan with 3 "speeds".  1 being the clear lights setting, 2 being the multi lights setting, and 3 being all lights.  It relies
- *					- on IFTTT integration and enabling of webhooks.  Input your key into the the preferences, and you'll have to create the rules on IFTTT to trigger on
- *					- the following events: xmas_tree_clear, xmas_tree_multi, xmas_tree_all, and xmas_tree_off.  Within IFTTT they will trigger the percentage from
- *					- within the Bond "that" integration, 20% = 1 Speed in Bond = xmas_tree_clear, 50% = 2 Speed in Bond = xmas_tree_multi, 80% = 3 Speed in Bond = xmas_tree_all and finally,
- *					- Off = Off in Bond = xmas_tree_off.  I found it was best to use webCoRE (https://dashboard.webcore.co) to schedule because of the custom commands.
- *					- If you use would prefer to not use webCoRE and just used standard scheduling.  Whatever your set for your default, will be what happens when you turn the switch on.
+ * 	Changelog
+ *		v1.5.0	- With the new Bond App Removing IFTTT support and adding Local API support, this is a refactor to the Local API instead of utilizing IFTTT.  Requires the new 
+ *			    - version of the Bond App, new firmware (v2.9.4 as of today), and a NAT entry in your firewall to the local Bond IP.  Something like port 10000 being forwarded
+ *			    - to port 80 of the bond and then the URI in the preferences being the WAN IP of your home/firewall/ISP.
+ *		v1.0.0	- Initial push of Xmas Tree Controller Device.  This uses the Bond RF Controller (https://bondhome.io) to attach the Balsam Xmas Tree (https://www.balsamhill.com/) 
+ *              - RF controller as a type of fan with 3 "speeds".  1 being the clear lights setting, 2 being the multi lights setting, and 3 being all lights.  It relies
+ *			    - on IFTTT integration and enabling of webhooks.  Input your key into the the preferences, and you'll have to create the rules on IFTTT to trigger on
+ *			    - the following events: xmas_tree_clear, xmas_tree_multi, xmas_tree_all, and xmas_tree_off.  Within IFTTT they will trigger the percentage from
+ *			    - within the Bond "that" integration, 20% = 1 Speed in Bond = xmas_tree_clear, 50% = 2 Speed in Bond = xmas_tree_multi, 80% = 3 Speed in Bond = xmas_tree_all and finally,
+ *			    - Off = Off in Bond = xmas_tree_off.  I found it was best to use webCoRE (https://dashboard.webcore.co) to schedule because of the custom commands.
+ *			    - If you use would prefer to not use webCoRE and just used standard scheduling.  Whatever your set for your default, will be what happens when you turn the switch on.
  * 
  *  Copyright 2019 Brandon Miller
  *
