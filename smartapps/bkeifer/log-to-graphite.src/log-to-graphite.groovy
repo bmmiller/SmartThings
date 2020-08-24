@@ -17,7 +17,7 @@
 definition(
     name: "Log to Graphite",
     namespace: "bkeifer",
-    author: "Brian Keifer",
+    author: "Brian Keifer/Brandon Miller",
     description: "Log various things to a Graphite instance",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
