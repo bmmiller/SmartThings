@@ -59,7 +59,7 @@ def updated() {
 def initialize() {
 	state.clear()
     unschedule(checkSensors)
-    //schedule("0 * * * * ?", "checkSensors")
+    //schedule("* * * * * ?", "checkSensors")
     subscribe(app, appTouch)
 }
 
@@ -180,11 +180,13 @@ private logField2(logItems) {
 		log.debug json
 
 		def params = [
-        	uri: "http://${backstop_host}:${backstop_port}/publish/${item[1]}",
-            body: json
+            headers: [ HOST: "${backstop_host}:${backstop_port}"],
+            path: "/publish/${item[1]}",
+            body: json           
         ]
         try {
-        	httpPostJson(params)// {response -> parseHttpResponse(response)}
+        	log.debug "${params}"          
+            sendHubCommand(new physicalgraph.device.HubAction(params))
             log.debug "Success!"
         }
 		catch ( groovyx.net.http.HttpResponseException ex ) {
