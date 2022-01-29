@@ -256,6 +256,7 @@ def takeAction() {
 }
 
 def pollChildren() { 
+	log.info "Begin polling children"
 	def GARAGEIO_SUCCESS=200
     def GARAGEIO_AUTH_ERROR=401
 
@@ -316,8 +317,8 @@ def push(doorId, changeState) {
         	getAuthToken()
             
         return response.data.code
-    }
-	
+    }	
+    runIn(60, pollChildren)
 }
 
 def watchdogTask() {

@@ -1,7 +1,8 @@
 /**
- *  Garageio Device v1.5 - 2019-01-13
+ *  Garageio Device v1.6 - 2022-01-29
  *
  * 		Changelog
+ *			v1.6	- Updates for New App
  *			v1.5	- Remove Garage Door Control which was deprecated
  *			v1.4.1	- Another small fix for polling and ActionTiles
  *			v1.4	- Fixes for ActionTiles compatibility
@@ -31,36 +32,51 @@
  
 metadata {
 	definition (name: "Garageio Device", namespace: "bmmiller", author: "Brandon Miller") {
+		capability "Door Control"
+		capability "Contact Sensor"
+		capability "Refresh"
+		capability "Sensor"
         capability "Polling"
-        capability "Door Control"
-            
+        capability "Relay Switch"
+        capability "Momentary"
         attribute "status", "string"
     }
     
-    tiles(scale: 2) {
-    	multiAttributeTile(name:"status", type:"generic", width: 6, height: 4) {
-            tileAttribute("device.door", key: "PRIMARY_CONTROL") {           
-                attributeState("closed", label: '${name}', icon:"st.doors.garage.garage-closed", action: "open", backgroundColor:"#00a0dc", nextState:"opening")
-                attributeState("open", label: '${name}', icon:"st.doors.garage.garage-open", action: "close", backgroundColor:"#e86d13", nextState:"closing")
+    tiles(scale:2) {
+    	multiAttributeTile(name:"summary", type: "generic", width: 6, height: 4){
+			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
+                attributeState("closed", label:'${name}', action:"door control.open", icon:"st.doors.garage.garage-closed", backgroundColor:"#00a0dc", nextState:"opening")
+                attributeState("open", label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open", backgroundColor:"#e86d13", nextState:"closing")
                 attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#e86d13")
-				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#e86d13")
+                attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#00a0dc")
             }
-    	}    
+        }
         
-        standardTile("open", "device.door", decoration: "flat", width: 2, height: 2) {
+        standardTile("toggle", "device.door", width: 4, height: 4) {
+			state("closed", label:'${name}', action:"door control.open", icon:"st.doors.garage.garage-closed", backgroundColor:"#00A0DC", nextState:"opening")
+			state("open", label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open", backgroundColor:"#e86d13", nextState:"closing")
+			state("opening", label:'${name}', icon:"st.doors.garage.garage-closed", backgroundColor:"#e86d13")
+			state("closing", label:'${name}', icon:"st.doors.garage.garage-open", backgroundColor:"#00A0DC")	
+		}
+        
+        standardTile("open", "device.door", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'open', action:"open", icon:"st.doors.garage.garage-opening"
 		}
-		standardTile("close", "device.door", decoration: "flat", width: 2, height: 2) {
+		standardTile("close", "device.door", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'close', action:"close", icon:"st.doors.garage.garage-closing"
-		}
-        
-        standardTile("refresh", "device", decoration: "flat", width: 2, height: 2) {
+		}       
+        standardTile("refresh", "device", width: 2, height: 2, inactiveLabel: false, decoration: "flat" ) {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
 		
-        main(["status"])
-		details(["status","open","close","refresh"])
+        main "summary"
+		details(["summary", "open", "close", "refresh"])
 	}
+}
+
+def refresh() {
+	log.trace "Refresh called"
+    poll()
 }
 
 def poll() {
@@ -88,15 +104,11 @@ def parsePollData(results) {
 def updateStatus(status) {
 	if (status == "CLOSED")
     {    	
-        sendEvent(name: 'status', value: 'closed')
-        sendEvent(name: 'state', value: 'closed')
-        sendEvent(name: 'door', value: 'closed')
+        sendEventClosed()
     }
     else if (status == "OPEN")
     {
-    	sendEvent(name: 'status', value: 'open')
-        sendEvent(name: 'state', value: 'open')
-        sendEvent(name: 'door', value: 'open')
+    	sendEventOpen()
     }
     log.debug "Status Before Poll for Door Id ${device.deviceNetworkId}: ${state.status}, Status After Poll: ${status}"
     // Now update
@@ -107,7 +119,7 @@ def open() {
 	if (state.status == "CLOSED") {
     	log.debug "open(): Opening door"
         push()
-        sendEvent(name: "door", value: "open")
+        sendEventOpen()
     } else {
         log.debug "We're already open, doing nothing"
     }
@@ -117,7 +129,7 @@ def close() {
 	if (state.status == "OPEN") {
     	log.debug "close(): Closing door"
 		push()
-        sendEvent(name: "door", value: "closed")
+        sendEventClosed()
     } else {
     	log.debug "We're already closed, doing nothing"
     }
@@ -131,8 +143,25 @@ def push() {
     def result = parent.push(device.deviceNetworkId, changeState)
     log.debug result
     if (result == 200) {
+    	log.info "Push was successful.  Polling in 60 seconds..."
     	runIn(60, parent.pollChildren()) 
     } else if (result == 401) {
     	log.error "Authentication error, need to get/refresh token."
     }
+}
+
+def sendEventOpen() {
+	log.info "sendEventOpen()"
+	sendEvent(name: 'status', value: 'open')
+    sendEvent(name: 'state', value: 'open')
+    sendEvent(name: 'door', value: 'open')
+    sendEvent(name: 'contact', value: 'open')
+}
+
+def sendEventClosed() {
+	log.info "sendEventClosed()"
+    sendEvent(name: 'status', value: 'closed')
+    sendEvent(name: 'state', value: 'closed')
+    sendEvent(name: 'door', value: 'closed')
+    sendEvent(name: 'contact', value: 'closed')
 }
